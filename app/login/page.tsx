@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +44,35 @@ export default function LoginPage() {
       console.error("Unexpected sign-in error:", err);
       toast.error("Unexpected error during sign-in");
       setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast.error("Please enter your email above to reset your password");
+      return;
+    }
+
+    setResetLoading(true);
+
+    try {
+      // supabase.auth.resetPasswordForEmail takes (email, options?)
+      const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+
+      if (error) {
+        console.error("Reset password error:", error);
+        toast.error(error.message ?? "Failed to send password reset email");
+        setResetLoading(false);
+        return;
+      }
+
+      toast.success("Password reset email sent. Check your inbox.");
+    } catch (err) {
+      console.error("Unexpected reset password error:", err);
+      toast.error("Unexpected error while requesting password reset");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -82,7 +112,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <div>
+          <div className="flex items-center justify-between">
             <button
               type="submit"
               disabled={loading}
@@ -93,9 +123,20 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <p className="text-xs text-gray-500 mt-4">
-          Admin access only. If you don't have access, ask an administrator to assign the admin role.
-        </p>
+        <div className="mt-4 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={handleResetPassword}
+            disabled={resetLoading}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            {resetLoading ? "Sending…" : "Forgot password?"}
+          </button>
+
+          <p className="text-xs text-gray-500">
+            Admin access only. If you don't have access, ask an administrator to assign the admin role.
+          </p>
+        </div>
       </div>
     </div>
   );
