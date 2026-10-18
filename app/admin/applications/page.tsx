@@ -119,17 +119,13 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     const init = async () => {
-      try {
-        // Ensure an anonymous session exists for RLS policies that expect auth
-        await supabase.auth.signInAnonymously();
-      } catch (err) {
-        // signInAnonymously may fail if provider disabled; ignore and continue — many projects expect anon key to work
-        console.warn("supabase anonymous sign-in failed:", err);
-      }
+      // The admin UI relies on authenticated sessions (middleware + layout guard).
+      // Do NOT sign in anonymously here — remove signInAnonymously calls so admin pages
+      // only operate with a real authenticated session.
 
       setLoading(true);
 
-      // fetch all resources in parallel
+      // fetch all resources in parallel (assumes the request is authenticated)
       await Promise.all([fetchApplications(), fetchParents(), fetchSchools()]);
 
       setLoading(false);
