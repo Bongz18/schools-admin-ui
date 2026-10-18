@@ -28,37 +28,51 @@ export default function ApplicationsPage() {
   // SECTION 2 — Fetching
   // -----------------------------
   const fetchApplications = async () => {
-    const { data, error } = await supabase
-      .from("Applications")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("applications")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching applications:", error);
-      return;
+      if (error) {
+        console.error("Error fetching applications:", error);
+        return;
+      }
+
+      setApplications(data || []);
+    } catch (err) {
+      console.error("Unexpected error fetching applications:", err);
     }
-
-    setApplications(data || []);
   };
 
   const fetchParents = async () => {
-    const { data, error } = await supabase.from("User").select("id, email");
+    try {
+      const { data, error } = await supabase.from("users").select("id, email");
 
-    console.log("PARENTS DATA:", data);
-    console.log("PARENTS ERROR:", error);
-    console.log("PARENTS:", parents);
-    console.log("SCHOOLS:", schools);
+      if (error) {
+        console.error("Error fetching parents:", error);
+        return;
+      }
 
-    setParents(data || []);
+      setParents(data || []);
+    } catch (err) {
+      console.error("Unexpected error fetching parents:", err);
+    }
   };
 
   const fetchSchools = async () => {
-    const { data, error } = await supabase.from("School").select("id, name");
+    try {
+      const { data, error } = await supabase.from("schools").select("id, name");
 
-    console.log("SCHOOLS DATA:", data);
-    console.log("SCHOOLS ERROR:", error);
+      if (error) {
+        console.error("Error fetching schools:", error);
+        return;
+      }
 
-    setSchools(data || []);
+      setSchools(data || []);
+    } catch (err) {
+      console.error("Unexpected error fetching schools:", err);
+    }
   };
 
   // -----------------------------
@@ -71,8 +85,8 @@ export default function ApplicationsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredApplications = applications.filter((app) => {
-    const parent = parents.find((p) => p.id === app.parent_id);
-    const school = schools.find((s) => s.id === app.school_id);
+    const parent = parents.find((p) => String(p.id) === String(app.parent_id));
+    const school = schools.find((s) => String(s.id) === String(app.school_id));
 
     const matchesSearch =
       !searchQuery ||
@@ -80,7 +94,8 @@ export default function ApplicationsPage() {
       school?.name?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || app.status === statusFilter;
-    const matchesSchool = schoolFilter === "all" || app.school_id === schoolFilter;
+    const matchesSchool =
+      schoolFilter === "all" || String(app.school_id) === String(schoolFilter);
 
     return matchesSearch && matchesStatus && matchesSchool;
   });
@@ -98,89 +113,99 @@ export default function ApplicationsPage() {
   }, [totalPages]);
 
   const paginatedApplications = sortedApplications.slice(
-  (currentPage - 1) * pageSize,
-  currentPage * pageSize
-);
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
-useEffect(() => {
-  const init = async () => {
-    await supabase.auth.signInAnonymously();
-    fetchApplications();
-    fetchParents();
-    fetchSchools();
-  };
+  useEffect(() => {
+    const init = async () => {
+      try {
+        // Ensure an anonymous session exists for RLS policies that expect auth
+        await supabase.auth.signInAnonymously();
+      } catch (err) {
+        // signInAnonymously may fail if provider disabled; ignore and continue — many projects expect anon key to work
+        console.warn("supabase anonymous sign-in failed:", err);
+      }
 
-  init();
-}, []);
-// -----------------------------
-// SECTION 4 — Filters UI
-// -----------------------------
-const ApplicationsFilters = () => (
-  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      setLoading(true);
 
-    {/* Search */}
-    <input
-      type="text"
-      placeholder="Search by parent or school..."
-      value={searchQuery}
-      onChange={(e) => {
-        setSearchQuery(e.target.value);
-        setCurrentPage(1);
-      }}
-      className="border rounded px-3 py-2 w-full md:w-64"
-    />
+      // fetch all resources in parallel
+      await Promise.all([fetchApplications(), fetchParents(), fetchSchools()]);
 
-    <div className="flex items-center gap-3">
+      setLoading(false);
+    };
 
-      {/* Status Filter */}
-      <select
-        value={statusFilter}
+    init();
+  }, []);
+  // -----------------------------
+  // SECTION 4 — Filters UI
+  // -----------------------------
+  const ApplicationsFilters = () => (
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search by parent or school..."
+        value={searchQuery}
         onChange={(e) => {
-          setStatusFilter(e.target.value);
+          setSearchQuery(e.target.value);
           setCurrentPage(1);
         }}
-        className="border rounded px-3 py-2"
-      >
-        <option value="all">All Statuses</option>
-        <option value="submitted">Submitted</option>
-        <option value="in_review">In Review</option>
-        <option value="accepted">Accepted</option>
-        <option value="rejected">Rejected</option>
-      </select>
+        className="border rounded px-3 py-2 w-full md:w-64"
+      />
 
-      {/* School Filter */}
-      <select
-        value={schoolFilter}
-        onChange={(e) => {
-          setSchoolFilter(e.target.value);
-          setCurrentPage(1);
-        }}
-        className="border rounded px-3 py-2"
-      >
-        <option value="all">All Schools</option>
-        {schools.map((school) => (
-          <option key={school.id} value={school.id}>
-            {school.name}
-          </option>
-        ))}
-      </select>
+      <div className="flex items-center gap-3">
 
-      {/* New Application Button */}
-      <button
-        onClick={() => {
-          setNewParentId("");
-          setNewSchoolId("");
-          setNewStatus("submitted");
-          setNewNotes("");
-          setIsCreateModalOpen(true);
-        }}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-      >
-        + New Application
-      </button>
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="border rounded px-3 py-2"
+        >
+          <option value="all">All Statuses</option>
+          <option value="submitted">Submitted</option>
+          <option value="in_review">In Review</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+
+        {/* School Filter */}
+        <select
+          value={schoolFilter}
+          onChange={(e) => {
+            setSchoolFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="border rounded px-3 py-2"
+        >
+          <option value="all">All Schools</option>
+          {schools.map((school) => (
+            <option key={school.id} value={school.id}>
+              {school.name}
+            </option>
+          ))}
+        </select>
+
+        {/* New Application Button */}
+        <button
+          onClick={() => {
+            setNewParentId("");
+            setNewSchoolId("");
+            setNewStatus("submitted");
+            setNewNotes("");
+            setIsCreateModalOpen(true);
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          + New Application
+        </button>
+      </div>
     </div>
-  </div>
-);  // ← THIS LINE WAS MISSING
+  );
 
   // -----------------------------
   // SECTION 5 — Applications Table
@@ -296,8 +321,8 @@ const ApplicationsFilters = () => (
   const EditApplicationPanel = () => {
     if (!selectedApplication) return null;
 
-    const parent = parents.find((p) => p.id === selectedApplication.parent_id);
-    const school = schools.find((s) => s.id === selectedApplication.school_id);
+    const parent = parents.find((p) => String(p.id) === String(selectedApplication.parent_id));
+    const school = schools.find((s) => String(s.id) === String(selectedApplication.school_id));
 
     const handleSave = () => {
       handleUpdateApplication({
@@ -444,6 +469,7 @@ const ApplicationsFilters = () => (
     fetchApplications();
   };
 
+  // (other handlers like handleUpdateApplication, handleDeleteApplication are assumed to exist in the file elsewhere)
   const CreateApplicationModal = () => (
     <div
       className={`fixed inset-0 bg-black/30 flex items-center justify-center transition-opacity ${
@@ -542,17 +568,17 @@ const ApplicationsFilters = () => (
     </div>
   );
 
-// -----------------------------
-// SECTION 9 — Final Page Assembly
-// -----------------------------
-return (
-  <div className="p-6 space-y-6">
-    <h1 className="text-2xl font-semibold">Applications</h1>
-    <ApplicationsFilters />
-    <ApplicationsTable />
-    <EditApplicationPanel />
-    <DeleteApplicationModal />
-    <CreateApplicationModal />
-  </div>
-);
+  // -----------------------------
+  // SECTION 9 — Final Page Assembly
+  // -----------------------------
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Applications</h1>
+      <ApplicationsFilters />
+      <ApplicationsTable />
+      <EditApplicationPanel />
+      <DeleteApplicationModal />
+      <CreateApplicationModal />
+    </div>
+  );
 }
