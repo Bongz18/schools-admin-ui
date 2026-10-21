@@ -1,10 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { event, entityType, entityId, actor, details } = body || {};
+    const body = (await request.json()) as {
+      event?: string;
+      entityType?: string;
+      entityId?: string | number;
+      actor?: string;
+      details?: Record<string, unknown>;
+    };
+
+    const event = body.event;
+    const entityType = body.entityType;
+    const entityId = body.entityId;
 
     if (!event || !entityType || entityId === undefined || entityId === null) {
       return NextResponse.json({ ok: true, skipped: true });
@@ -23,8 +32,8 @@ export async function POST(request: Request) {
       entity_type: entityType,
       entity_id: String(entityId),
       event,
-      actor: actor || "system",
-      details: details ? JSON.stringify(details) : null,
+      actor: body.actor || "system",
+      details: body.details ? JSON.stringify(body.details) : null,
     });
 
     if (error) {

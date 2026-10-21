@@ -1,180 +1,231 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
 import supabase from "@/utils/supabaseClient";
+import { toast } from "react-hot-toast";
 
 type Application = {
   id: number;
-  parent_id: string | number | null;
-  school_id: string | number | null;
+  parent_id: number | string;
+  school_id: number | string;
   status: string;
-  notes: string | null;
-  created_at: string;
+  notes?: string | null;
+  created_at?: string;
 };
 
-type ParentRecord = {
-  id: string | number;
+type Parent = {
+  id: number | string;
   email?: string | null;
 };
 
-type SchoolRecord = {
-  id: string | number;
+type School = {
+  id: number | string;
   name?: string | null;
-};
-
-type ReviewResult = {
-  summary: string;
-  recommended_status: string;
-  confidence: number;
-  flags: string[];
-};
-
-type ApprovalTarget = {
-  appId: number;
-  nextStatus: string;
-};
-
-const logAuditEvent = async (
-  event: string,
-  entityType: string,
-  entityId: string | number,
-  details: Record<string, unknown> = {}
-) => {
-  try {
-    await fetch("/api/audit-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event,
-        entityType,
-        entityId,
-        actor: "admin-user",
-        details,
-      }),
-    });
-  } catch (error) {
-    console.error("Audit logging failed:", error);
-  }
 };
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
-  const [parents, setParents] = useState<ParentRecord[]>([]);
-  const [schools, setSchools] = useState<SchoolRecord[]>([]);
+  const [parents, setParents] = useState<Parent[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
-  const [reviewingId, setReviewingId] = useState<number | null>(null);
-  const [reviewResults, setReviewResults] = useState<Record<number, ReviewResult>>({});
-  const [approvalTarget, setApprovalTarget] = useState<ApprovalTarget | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [schoolFilter, setSchoolFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [reviewResults, setReviewResults] = useState<Record<string, unknown>>({});
+
+  const pageSize = 10;
+
+  const fetchApplications = async () => {
+    const { data, error } = await supabase.from("applications").select("*").order("created_at", {
+      ascending: false,
+    });
+
+    if (error) {
+      console.error("Error fetching applications:", error);
+      setApplications([]);
+      return;
+    }
+
+    setApplications((data ?? []) as Application[]);
+  };
+
+  const fetchParents = async () => {
+    const { data, error } = await supabase.from("users").select("id, email");
+
+    if (error) {
+      console.error("Error fetching parents:", error);
+      setParents([]);
+      return;
+    }
+
+    setParents((data ?? []) as Parent[]);
+  };
+
+  const fetchSchools = async () => {
+    const { data, error } = await supabase.from("schools").select("id, name");
+
+    if (error) {
+      console.error("Error fetching schools:", error);
+      setSchools([]);
+      return;
+    }
+
+    setSchools((data ?? []) as School[]);
+  };
 
   const loadData = async () => {
     setLoading(true);
-
-    try {
-      const [applicationsRes, parentsRes, schoolsRes] = await Promise.all([
-        supabase.from("applications").select("*").order("created_at", { ascending: false }),
-        supabase.from("users").select("id, email"),
-        supabase.from("schools").select("id, name"),
-      ]);
-
-      if (applicationsRes.error) console.error("Applications fetch error:", applicationsRes.error);
-      if (parentsRes.error) console.error("Parents fetch error:", parentsRes.error);
-      if (schoolsRes.error) console.error("Schools fetch error:", schoolsRes.error);
-
-      setApplications((applicationsRes.data || []) as Application[]);
-      setParents((parentsRes.data || []) as ParentRecord[]);
-      setSchools((schoolsRes.data || []) as SchoolRecord[]);
-    } catch (error) {
-      console.error("Unable to load applications data:", error);
-      toast.error("Failed to load applications.");
-    } finally {
-      setLoading(false);
-    }
+    await Promise.all([fetchApplications(), fetchParents(), fetchSchools()]);
+    setLoading(false);
   };
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const getParentEmail = (parentId: string | number | null) => {
-    const parent = parents.find((item) => String(item.id) === String(parentId));
-    return parent?.email || "Unknown parent";
-  };
+  const parentMap = new Map(parents.map((p) => [String(p.id), p.email ?? "Unknown parent"]));
+  const schoolMap = new Map(schools.map((s) => [String(s.id), s.name ?? "Unknown school"]));
 
-  const getSchoolName = (schoolId: string | number | null) => {
-    const school = schools.find((item) => String(item.id) === String(schoolId));
-    return school?.name || "Unknown school";
-  };
+  const filteredApplications = applications.filter((app) => {
+    const parentEmail = parentMap.get(String(app.parent_id)) ?? "";
+    const schoolName = schoolMap.get(String(app.school_id)) ?? "";
 
-  const handleReview = async (app: Application) => {
-    setReviewingId(app.id);
+    const matchesSearch =
+      !searchQuery ||
+      parentEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      schoolName.toLowerCase().includes(searchQuery.toLowerCase());
 
+    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
+    const matchesSchool = schoolFilter === "all" || String(app.school_id) === String(schoolFilter);
+
+    return matchesSearch && matchesStatus && matchesSchool;
+  });
+
+  const sortedApplications = [...filteredApplications].sort(
+    (a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime(),
+  );
+
+  const totalPages = Math.max(1, Math.ceil(sortedApplications.length / pageSize));
+  const paginatedApplications = sortedApplications.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const handleAiReview = async (application: Application) => {
     try {
-      const parent = parents.find((item) => String(item.id) === String(app.parent_id));
-      const school = schools.find((item) => String(item.id) === String(app.school_id));
-
       const response = await fetch("/api/ai-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          application: app,
-          parent,
-          school,
+          application: {
+            ...application,
+            parent_email: parentMap.get(String(application.parent_id)) ?? "",
+            school_name: schoolMap.get(String(application.school_id)) ?? "",
+          },
+          actor: "admin",
         }),
       });
 
-      const result = (await response.json()) as ReviewResult;
-      setReviewResults((current) => ({ ...current, [app.id]: result }));
+      const result = await response.json();
 
-      await logAuditEvent("ai_review_generated", "application", app.id, {
-        status: app.status,
-        school: school?.name || "unknown",
-        parent: parent?.email || "unknown",
-      });
+      if (!response.ok) {
+        throw new Error(result?.error ?? "AI review failed");
+      }
+
+      setReviewResults((prev) => ({
+        ...prev,
+        [String(application.id)]: result,
+      }));
 
       toast.success("AI review generated");
     } catch (error) {
-      console.error("AI review failed:", error);
-      toast.error("Unable to generate AI review.");
-    } finally {
-      setReviewingId(null);
+      console.error("AI review error:", error);
+      toast.error(error instanceof Error ? error.message : "AI review failed");
     }
   };
 
-  const handleStatusUpdate = async (appId: number, nextStatus: string) => {
-    const { error } = await supabase.from("applications").update({ status: nextStatus }).eq("id", appId);
+  const updateApplicationStatus = async (applicationId: number, nextStatus: string) => {
+    const { error } = await supabase
+      .from("applications")
+      .update({ status: nextStatus })
+      .eq("id", applicationId);
 
     if (error) {
-      console.error("Error updating application status:", error);
-      toast.error("Status update failed.");
+      console.error("Status update failed:", error);
+      toast.error("Status update failed");
       return;
     }
 
-    await logAuditEvent("status_updated", "application", appId, {
-      next_status: nextStatus,
-      source: "ai_recommendation",
-    });
-
-    toast.success(`Application marked as ${nextStatus}`);
-    setApplications((current) =>
-      current.map((application) =>
-        application.id === appId ? { ...application, status: nextStatus } : application
-      )
-    );
-    setApprovalTarget(null);
+    toast.success("Application status updated");
+    await fetchApplications();
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">Operations</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">Applications</h1>
+    <div className="space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">Admissions</p>
+          <h1 className="mt-2 text-3xl font-bold text-slate-900">Applications</h1>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(event) => {
+            setSearchQuery(event.target.value);
+            setCurrentPage(1);
+          }}
+          placeholder="Search by parent or school"
+          className="w-full rounded border border-slate-300 px-3 py-2 md:max-w-xs"
+        />
+
+        <div className="flex gap-3">
+          <select
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded border border-slate-300 px-3 py-2"
+          >
+            <option value="all">All statuses</option>
+            <option value="submitted">Submitted</option>
+            <option value="in_review">In review</option>
+            <option value="accepted">Accepted</option>
+            <option value="rejected">Rejected</option>
+          </select>
+
+          <select
+            value={schoolFilter}
+            onChange={(event) => {
+              setSchoolFilter(event.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded border border-slate-300 px-3 py-2"
+          >
+            <option value="all">All schools</option>
+            {schools.map((school) => (
+              <option key={String(school.id)} value={String(school.id)}>
+                {school.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading ? (
         <div className="space-y-3">
-          {[...Array(4)].map((_, index) => (
-            <div key={index} className="h-14 animate-pulse rounded-xl bg-slate-200" />
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="h-12 animate-pulse rounded bg-slate-200" />
           ))}
         </div>
       ) : (
@@ -182,125 +233,89 @@ export default function ApplicationsPage() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
-                <th className="px-4 py-3 font-medium">Parent</th>
-                <th className="px-4 py-3 font-medium">School</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Created</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
+                <th className="px-4 py-3">Parent</th>
+                <th className="px-4 py-3">School</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Created</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {applications.map((application) => {
-                const review = reviewResults[application.id];
+              {paginatedApplications.map((application) => {
+                const review = reviewResults[String(application.id)] as Record<string, unknown> | undefined;
+                const parentEmail = parentMap.get(String(application.parent_id)) ?? "Unknown parent";
+                const schoolName = schoolMap.get(String(application.school_id)) ?? "Unknown school";
+
                 return (
                   <tr key={application.id} className="border-t border-slate-200 align-top">
-                    <td className="px-4 py-3 text-slate-700">{getParentEmail(application.parent_id)}</td>
-                    <td className="px-4 py-3 text-slate-700">{getSchoolName(application.school_id)}</td>
+                    <td className="px-4 py-3 text-slate-800">{parentEmail}</td>
+                    <td className="px-4 py-3 text-slate-800">{schoolName}</td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                      <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-medium capitalize text-slate-700">
                         {application.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {new Date(application.created_at).toLocaleDateString()}
+                    <td className="px-4 py-3 text-slate-700">
+                      {application.created_at ? new Date(application.created_at).toLocaleDateString() : "—"}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap justify-end gap-2">
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex justify-end gap-2">
                         <button
                           type="button"
-                          onClick={() => handleReview(application)}
-                          disabled={reviewingId === application.id}
-                          className="rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+                          onClick={() => handleAiReview(application)}
+                          className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700"
                         >
-                          {reviewingId === application.id ? "Reviewing..." : "AI Review"}
+                          AI review
                         </button>
-
-                        {review && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setApprovalTarget({
-                                appId: application.id,
-                                nextStatus: review.recommended_status,
-                              })
-                            }
-                            className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
-                          >
-                            Apply {review.recommended_status}
-                          </button>
-                        )}
+                        <select
+                          value={application.status}
+                          onChange={(event) => updateApplicationStatus(application.id, event.target.value)}
+                          className="rounded border border-slate-300 px-2 py-1 text-xs"
+                        >
+                          <option value="submitted">Submitted</option>
+                          <option value="in_review">In review</option>
+                          <option value="accepted">Accepted</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
                       </div>
+
+                      {review && (
+                        <div className="mt-2 rounded border border-emerald-200 bg-emerald-50 p-2 text-left text-xs text-emerald-800">
+                          <div className="font-semibold">{String(review.summary ?? "AI review")}</div>
+                          <div className="mt-1">
+                            Recommended: <span className="font-medium">{String(review.recommended_status ?? "in_review")}</span>
+                          </div>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-        </div>
-      )}
 
-      {Object.entries(reviewResults).length > 0 && (
-        <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-900">AI review results</h2>
+          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-3">
+            <span className="text-sm text-slate-600">
+              Page {currentPage} of {totalPages}
+            </span>
 
-          {Object.entries(reviewResults).map(([appId, review]) => (
-            <div key={appId} className="rounded-xl border border-sky-100 bg-sky-50 p-4">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold uppercase tracking-[0.14em] text-sky-700">
-                  Application #{appId}
-                </p>
-                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-sky-700">
-                  confidence {review.confidence.toFixed(2)}
-                </span>
-              </div>
-
-              <p className="text-slate-700">{review.summary}</p>
-
-              <div className="mt-4">
-                <p className="text-sm font-semibold text-slate-800">Recommended status</p>
-                <p className="mt-1 inline-flex rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
-                  {review.recommended_status}
-                </p>
-              </div>
-
-              <div className="mt-4">
-                <p className="text-sm font-semibold text-slate-800">Flags</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
-                  {review.flags.map((flag) => (
-                    <li key={flag}>{flag}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {approvalTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <h3 className="text-xl font-semibold text-slate-900">Approve AI recommendation</h3>
-            <p className="mt-3 text-sm text-slate-600">
-              This will update application #{approvalTarget.appId} to the status
-              <span className="mx-1 font-semibold text-slate-900">{approvalTarget.nextStatus}</span>.
-            </p>
-
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setApprovalTarget(null)}
-                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                className="rounded border border-slate-300 bg-white px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Cancel
+                Prev
               </button>
+
               <button
                 type="button"
-                onClick={() =>
-                  handleStatusUpdate(approvalTarget.appId, approvalTarget.nextStatus)
-                }
-                className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                className="rounded border border-slate-300 bg-white px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Confirm update
+                Next
               </button>
             </div>
           </div>
@@ -309,426 +324,3 @@ export default function ApplicationsPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{"version":1}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

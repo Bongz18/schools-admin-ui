@@ -1,143 +1,194 @@
-"use client";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import supabase from "@/utils/supabaseClient";
+type ReviewRequest = {
+  application?: Record<string, unknown>;
+  details?: Record<string, unknown>;
+  actor?: string;
+};
 
-export default function AdminDashboardPage() {
-  const [stats, setStats] = useState({
-    schools: 0,
-    users: 0,
-    applications: 0,
-    pending: 0,
+type ReviewResponse = {
+  ok: boolean;
+  mode: "live" | "fallback";
+  summary: string;
+  recommended_status: string;
+  risk_flags: string[];
+  score: number;
+  reasoning: string;
+  meta?: {
+    model?: string;
+    source?: string;
+  };
+};
+
+function buildFallbackReview(application?: Record<string, unknown>): ReviewResponse {
+  const status = String(application?.status ?? "in_review");
+  const applicant = String(application?.parent_email ?? application?.parent_id ?? "Applicant");
+  const school = String(application?.school_name ?? application?.school_id ?? "School");
+
+  return {
+    ok: true,
+    mode: "fallback",
+    summary: `${applicant} submitted an application for ${school}. The request is ready for admin review, but AI scoring is currently using the fallback mode because no AI API key is configured.`,
+    recommended_status: ["submitted", "in_review", "accepted", "rejected"].includes(status)
+      ? status
+      : "in_review",
+    risk_flags: [
+      "AI service not configured in this environment",
+      "Manual review still required before final approval",
+    ],
+    score: 72,
+    reasoning:
+      "Fallback mode provides a safe default recommendation to keep the process moving while reminding staff to verify the application manually.",
+    meta: {
+      model: "fallback",
+      source: "local-default-review",
+    },
+  };
+}
+
+async function logAuditEvent(event: string, entityType: string, entityId: string | number, actor: string, details: Record<string, unknown>) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) return;
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+  await supabase.from("audit_logs").insert({
+    entity_type: entityType,
+    entity_id: String(entityId),
+    event,
+    actor: actor || "system",
+    details: JSON.stringify(details),
   });
-  const [loading, setLoading] = useState(true);
+}
 
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const [schoolsRes, usersRes, applicationsRes] = await Promise.all([
-          supabase.from("schools").select("id", { count: "exact", head: true }),
-          supabase.from("users").select("id", { count: "exact", head: true }),
-          supabase.from("applications").select("id", { count: "exact", head: true }),
-        ]);
+export async function POST(request: NextRequest) {
+  try {
+    const body = (await request.json()) as ReviewRequest;
+    const application = body.application ?? {};
+    const actor = body.actor ?? "admin";
 
-        const schoolsCount = schoolsRes.count ?? 0;
-        const usersCount = usersRes.count ?? 0;
-        const applicationsCount = applicationsRes.count ?? 0;
+    if (!application || Object.keys(application).length === 0) {
+      return NextResponse.json(
+        { ok: false, error: "Application payload is required" },
+        { status: 400 },
+      );
+    }
 
-        const pendingRes = await supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "submitted");
+    const apiKey = process.env.OPENAI_API_KEY;
 
-        setStats({
-          schools: schoolsCount,
-          users: usersCount,
-          applications: applicationsCount,
-          pending: pendingRes.count ?? 0,
-        });
-      } catch (error) {
-        console.error("Unable to load dashboard stats:", error);
-      } finally {
-        setLoading(false);
-      }
+    if (!apiKey) {
+      const fallback = buildFallbackReview(application as Record<string, unknown>);
+      await logAuditEvent("ai_review_fallback", "application", String(application.id ?? "unknown"), actor, {
+        summary: fallback.summary,
+        recommended_status: fallback.recommended_status,
+      });
+
+      return NextResponse.json(fallback, { status: 200 });
+    }
+
+    const prompt = `
+You are reviewing a school application for an admin dashboard.
+Return valid JSON only with these keys:
+- summary
+- recommended_status
+- risk_flags
+- score
+- reasoning
+
+Use only one of these statuses: submitted, in_review, accepted, rejected.
+
+Application data:
+${JSON.stringify(application, null, 2)}
+
+Consider missing documents, red flags, and school fit.
+`;
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.3,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a careful school admissions reviewer. Return concise, structured JSON for admin decision support.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`AI request failed: ${response.status} ${errorData}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content ?? "{}";
+    let review: Partial<ReviewResponse>;
+
+    try {
+      review = JSON.parse(content);
+    } catch {
+      const cleaned = content.replace(/```json|```/g, "").trim();
+      review = JSON.parse(cleaned || "{}");
+    }
+
+    const normalizedReview: ReviewResponse = {
+      ok: true,
+      mode: "live",
+      summary:
+        typeof review.summary === "string"
+          ? review.summary
+          : "AI review completed successfully.",
+      recommended_status:
+        typeof review.recommended_status === "string" && ["submitted", "in_review", "accepted", "rejected"].includes(review.recommended_status)
+          ? review.recommended_status
+          : "in_review",
+      risk_flags: Array.isArray(review.risk_flags)
+        ? review.risk_flags.filter((flag): flag is string => typeof flag === "string")
+        : [],
+      score:
+        typeof review.score === "number"
+          ? Math.max(0, Math.min(100, review.score))
+          : 75,
+      reasoning:
+        typeof review.reasoning === "string"
+          ? review.reasoning
+          : "AI review completed successfully.",
+      meta: {
+        model: "gpt-4o-mini",
+        source: "openai-chat-completions",
+      },
     };
 
-    loadStats();
-  }, []);
+    await logAuditEvent("ai_review_completed", "application", String(application.id ?? "unknown"), actor, {
+      summary: normalizedReview.summary,
+      recommended_status: normalizedReview.recommended_status,
+      score: normalizedReview.score,
+    });
 
-  const cards = [
-    { label: "Schools", value: stats.schools, href: "/admin/schools", accent: "sky" },
-    { label: "Users", value: stats.users, href: "/admin/users", accent: "violet" },
-    { label: "Applications", value: stats.applications, href: "/admin/applications", accent: "emerald" },
-    { label: "Pending review", value: stats.pending, href: "/admin/applications", accent: "amber" },
-  ];
+    return NextResponse.json(normalizedReview, { status: 200 });
+  } catch (error) {
+    console.error("AI review route error:", error);
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">Admin dashboard</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">Operations overview</h1>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {[...Array(4)].map((_, index) => (
-            <div key={index} className="h-28 animate-pulse rounded-2xl bg-slate-200" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {cards.map((card) => (
-            <Link
-              key={card.label}
-              href={card.href}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500">{card.label}</span>
-                <span
-                  className={[
-                    "h-3 w-3 rounded-full",
-                    card.accent === "sky" && "bg-sky-500",
-                    card.accent === "violet" && "bg-violet-500",
-                    card.accent === "emerald" && "bg-emerald-500",
-                    card.accent === "amber" && "bg-amber-500",
-                  ].join(" ")}
-                />
-              </div>
-              <div className="mt-6 text-3xl font-bold text-slate-900">{card.value}</div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Recommended workflow</h2>
-          <div className="mt-5 space-y-4">
-            {[
-              "Review any newly submitted applications.",
-              "Use AI summaries to catch missing documents and unusual cases.",
-              "Approve recommended status updates before finalizing decisions.",
-            ].map((item, index) => (
-              <div key={item} className="flex gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-xs font-semibold text-sky-700">
-                  {index + 1}
-                </div>
-                <p className="text-slate-600">{item}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Quick actions</h2>
-          <div className="mt-5 flex flex-col gap-3">
-            <Link
-              href="/admin/applications"
-              className="rounded-xl bg-slate-900 px-4 py-3 text-center text-sm font-medium text-white transition hover:bg-slate-700"
-            >
-              Open applications
-            </Link>
-            <Link
-              href="/admin/users"
-              className="rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 transition hover:border-slate-400"
-            >
-              Manage users
-            </Link>
-            <Link
-              href="/admin/schools"
-              className="rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 transition hover:border-slate-400"
-            >
-              Manage schools
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    const fallback = buildFallbackReview();
+    return NextResponse.json(
+      {
+        ...fallback,
+        ok: false,
+        summary: "The AI review pipeline encountered an error, so the request was routed to fallback review mode.",
+        reasoning: error instanceof Error ? error.message : "Unknown AI processing error",
+      },
+      { status: 500 },
+    );
+  }
 }
