@@ -1,87 +1,119 @@
-import { NextResponse } from "next/server";
+"use client";
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { application, parent, school } = body || {};
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import supabase from "@/utils/supabaseClient";
+import { toast } from "react-hot-toast";
 
-    if (!application) {
-      return NextResponse.json({ error: "No application payload supplied." }, { status: 400 });
-    }
+const navItems = [
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/applications", label: "Applications" },
+  { href: "/admin/users", label: "Users" },
+  { href: "/admin/schools", label: "Schools" },
+];
 
-    const fallback = {
-      summary:
-        `This application is currently marked as ${application.status || "submitted"}. The applicant is ${
-          parent?.email || "unknown"
-        } and the selected school is ${school?.name || "unassigned"}. The record should be reviewed for completeness, readiness, and any missing required notes or documentation.`,
-      recommended_status: application.status === "accepted" ? "accepted" : "in_review",
-      confidence: 0.82,
-      flags: [
-        "Check whether supporting documents are complete.",
-        "Confirm the school match is still appropriate for this applicant.",
-        "Ask for clarification if the application notes are missing or unclear.",
-      ],
+export default function AdminLayoutGate({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error) {
+        console.error("Session check failed:", error);
+      }
+
+      if (!session) {
+        router.replace("/admin/login");
+        return;
+      }
+
+      setChecking(false);
     };
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(fallback);
-    }
+    checkSession();
+  }, [router]);
 
-    const prompt = `
-      You are helping a school administrator review an application.
-      Return JSON with: summary, recommended_status, confidence, flags.
-      summary should be 2-4 sentences.
-      recommended_status must be one of: submitted, in_review, accepted, rejected.
-      confidence must be a number between 0 and 1.
-      flags should be an array of strings.
-
-      Application data:
-      ${JSON.stringify({ application, parent, school }, null, 2)}
-    `;
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.35,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("OpenAI request failed:", await response.text());
-      return NextResponse.json(fallback);
-    }
-
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content || "";
-
+  const handleLogout = async () => {
     try {
-      const parsed = JSON.parse(content);
-      return NextResponse.json({
-        summary: parsed.summary || fallback.summary,
-        recommended_status: parsed.recommended_status || fallback.recommended_status,
-        confidence: typeof parsed.confidence === "number" ? parsed.confidence : fallback.confidence,
-        flags: Array.isArray(parsed.flags) ? parsed.flags : fallback.flags,
-      });
-    } catch {
-      return NextResponse.json(fallback);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Sign out error:", error);
+        toast.error(error.message || "Failed to sign out");
+        return;
+      }
+
+      toast.success("Signed out");
+      router.replace("/admin/login");
+    } catch (err) {
+      console.error("Unexpected sign out error:", err);
+      toast.error("Unexpected error during sign out");
     }
-  } catch (error) {
-    console.error("AI review route error:", error);
-    return NextResponse.json(
-      {
-        summary: "The application was reviewed locally because the AI service is currently unavailable.",
-        recommended_status: "in_review",
-        confidence: 0.7,
-        flags: ["Review the record manually before final approval."],
-      },
-      { status: 200 }
+  };
+
+  const currentNav = useMemo(
+    () => navItems.find((item) => item.href === pathname) || navItems[0],
+    [pathname]
+  );
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 text-slate-600">
+        Checking session...
+      </div>
     );
   }
+
+  return (
+    <div className="min-h-screen bg-slate-100 text-slate-900">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              School Admin
+            </div>
+            <h2 className="text-lg font-semibold text-slate-900">{currentNav.label}</h2>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <nav className="hidden gap-2 md:flex">
+              {navItems.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <button
+                    key={item.href}
+                    type="button"
+                    onClick={() => router.push(item.href)}
+                    className={[
+                      "rounded-md px-3 py-2 text-sm font-medium transition",
+                      active
+                        ? "bg-slate-900 text-white"
+                        : "border border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                    ].join(" ")}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-500"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+    </div>
+  );
 }
