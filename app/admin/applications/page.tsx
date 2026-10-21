@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 const navItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/applications", label: "Applications" },
+  { href: "/admin/audit", label: "Audit" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/schools", label: "Schools" },
 ];
