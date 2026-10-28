@@ -19,6 +19,15 @@
 -- HOW TO RUN: Supabase dashboard -> SQL Editor -> paste this file -> Run.
 -- Safe to run more than once.
 
+-- 0. API permissions ----------------------------------------------------------
+-- This project had the standard Supabase grants removed, so nothing (not even
+-- the service role) could reach the public schema. Restore only what the app
+-- needs: the server (service_role) gets full access, signed-in users can read
+-- the four app tables (RLS below limits that to admins), visitors get nothing.
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to service_role;
+grant select on public.schools, public.applications, public.users, public.audit_logs to authenticated;
+
 -- 1. Admin role ---------------------------------------------------------------
 alter table public.users add column if not exists role text not null default 'user';
 
@@ -79,6 +88,7 @@ alter table public."Review"            enable row level security;
 alter table public."_prisma_migrations" enable row level security;
 
 -- 6. Make an admin (edit the email, then run) ---------------------------------
+-- (Already done for admin@schools-app.com on the live project.)
 -- insert into public.users (email, full_name, role)
 -- values ('you@example.com', 'Your Name', 'admin')
 -- on conflict (email) do update set role = 'admin';
