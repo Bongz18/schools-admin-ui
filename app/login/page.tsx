@@ -39,7 +39,7 @@ export default function LoginPage() {
       toast.success("Signed in successfully");
 
       // Redirect to admin schools
-      router.push("/admin/schools");
+      router.push("/admin/applications");
     } catch (err) {
       console.error("Unexpected sign-in error:", err);
       toast.error("Unexpected error during sign-in");

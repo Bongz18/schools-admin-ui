@@ -1,8 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import supabase from "@/utils/supabaseClient";
+import supabase from "@/lib/supabaseClient";
+import { adminFetch } from "@/lib/adminFetch";
 import { toast } from "react-hot-toast";
+
+const STATUS_LABELS: Record<string, string> = {
+  submitted: "Submitted",
+  in_review: "In review",
+  accepted: "Accepted",
+  rejected: "Rejected",
+};
+
+type Review = {
+  mode?: string;
+  summary?: string;
+  recommended_status?: string;
+  risk_flags?: string[];
+  score?: number;
+};
 
 type Application = {
   id: number;
@@ -32,7 +48,8 @@ export default function ApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [schoolFilter, setSchoolFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [reviewResults, setReviewResults] = useState<Record<string, unknown>>({});
+  const [reviewResults, setReviewResults] = useState<Record<string, Review>>({});
+  const [reviewingId, setReviewingId] = useState<number | null>(null);
 
   const pageSize = 10;
 
@@ -119,17 +136,17 @@ export default function ApplicationsPage() {
   }, [currentPage, totalPages]);
 
   const handleAiReview = async (application: Application) => {
+    setReviewingId(application.id);
     try {
-      const response = await fetch("/api/ai-review", {
+      // Only the school name is added; the parent's email stays out of the AI request.
+      const response = await adminFetch("/api/ai-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           application: {
             ...application,
-            parent_email: parentMap.get(String(application.parent_id)) ?? "",
             school_name: schoolMap.get(String(application.school_id)) ?? "",
           },
-          actor: "admin",
         }),
       });
 
@@ -141,25 +158,43 @@ export default function ApplicationsPage() {
 
       setReviewResults((prev) => ({
         ...prev,
-        [String(application.id)]: result,
+        [String(application.id)]: result as Review,
       }));
 
-      toast.success("AI review generated");
+      toast.success(result?.mode === "fallback" ? "AI not configured: review manually" : "AI review generated");
     } catch (error) {
       console.error("AI review error:", error);
       toast.error(error instanceof Error ? error.message : "AI review failed");
+    } finally {
+      setReviewingId(null);
     }
   };
 
-  const updateApplicationStatus = async (applicationId: number, nextStatus: string) => {
-    const { error } = await supabase
-      .from("applications")
-      .update({ status: nextStatus })
-      .eq("id", applicationId);
+  // Status changes go through the server so they are permission-checked and audit-logged.
+  const updateApplicationStatus = async (
+    application: Application,
+    nextStatus: string,
+    source: "manual" | "ai_recommendation" = "manual",
+  ) => {
+    if (nextStatus === application.status) return;
 
-    if (error) {
-      console.error("Status update failed:", error);
-      toast.error("Status update failed");
+    const confirmed = window.confirm(
+      `Change this application from "${STATUS_LABELS[application.status] ?? application.status}" to "${
+        STATUS_LABELS[nextStatus] ?? nextStatus
+      }"?`,
+    );
+    if (!confirmed) return;
+
+    const response = await adminFetch(`/api/admin/applications/${application.id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: nextStatus, source }),
+    });
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.error("Status update failed:", result?.error);
+      toast.error(result?.error ?? "Status update failed");
       return;
     }
 
@@ -242,7 +277,7 @@ export default function ApplicationsPage() {
             </thead>
             <tbody>
               {paginatedApplications.map((application) => {
-                const review = reviewResults[String(application.id)] as Record<string, unknown> | undefined;
+                const review = reviewResults[String(application.id)];
                 const parentEmail = parentMap.get(String(application.parent_id)) ?? "Unknown parent";
                 const schoolName = schoolMap.get(String(application.school_id)) ?? "Unknown school";
 
@@ -263,13 +298,14 @@ export default function ApplicationsPage() {
                         <button
                           type="button"
                           onClick={() => handleAiReview(application)}
-                          className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700"
+                          disabled={reviewingId === application.id}
+                          className="rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 disabled:opacity-60"
                         >
-                          AI review
+                          {reviewingId === application.id ? "Reviewing..." : "AI review"}
                         </button>
                         <select
                           value={application.status}
-                          onChange={(event) => updateApplicationStatus(application.id, event.target.value)}
+                          onChange={(event) => updateApplicationStatus(application, event.target.value)}
                           className="rounded border border-slate-300 px-2 py-1 text-xs"
                         >
                           <option value="submitted">Submitted</option>
@@ -280,10 +316,39 @@ export default function ApplicationsPage() {
                       </div>
 
                       {review && (
-                        <div className="mt-2 rounded border border-emerald-200 bg-emerald-50 p-2 text-left text-xs text-emerald-800">
-                          <div className="font-semibold">{String(review.summary ?? "AI review")}</div>
-                          <div className="mt-1">
-                            Recommended: <span className="font-medium">{String(review.recommended_status ?? "in_review")}</span>
+                        <div className="mt-2 max-w-md rounded border border-emerald-200 bg-emerald-50 p-2 text-left text-xs text-emerald-800 ml-auto">
+                          <div className="font-semibold">{review.summary ?? "AI review"}</div>
+                          {review.risk_flags && review.risk_flags.length > 0 && (
+                            <ul className="mt-1 list-disc pl-4">
+                              {review.risk_flags.map((flag) => (
+                                <li key={flag}>{flag}</li>
+                              ))}
+                            </ul>
+                          )}
+                          <div className="mt-2 flex items-center justify-between gap-2">
+                            <span>
+                              Suggested:{" "}
+                              <span className="font-medium">
+                                {STATUS_LABELS[review.recommended_status ?? ""] ?? review.recommended_status}
+                              </span>
+                            </span>
+                            {review.mode === "live" &&
+                              review.recommended_status &&
+                              review.recommended_status !== application.status && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateApplicationStatus(
+                                      application,
+                                      review.recommended_status as string,
+                                      "ai_recommendation",
+                                    )
+                                  }
+                                  className="rounded border border-emerald-300 bg-white px-2 py-0.5 font-medium"
+                                >
+                                  Review &amp; apply
+                                </button>
+                              )}
                           </div>
                         </div>
                       )}
