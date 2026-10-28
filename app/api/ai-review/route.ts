@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireAdmin, writeAuditLog } from "@/lib/adminAuth";
+
+const ALLOWED_STATUSES = ["submitted", "in_review", "accepted", "rejected"];
+
+// Fields that identify a family. They are kept out of what is sent to the AI provider.
+const PERSONAL_FIELDS = ["parent_id", "parent_email", "email", "phone", "parent_phone", "national_id", "address"];
 
 type ReviewRequest = {
   application?: Record<string, unknown>;
-  details?: Record<string, unknown>;
-  actor?: string;
 };
 
 type ReviewResponse = {
@@ -23,23 +26,19 @@ type ReviewResponse = {
 
 function buildFallbackReview(application?: Record<string, unknown>): ReviewResponse {
   const status = String(application?.status ?? "in_review");
-  const applicant = String(application?.parent_email ?? application?.parent_id ?? "Applicant");
-  const school = String(application?.school_name ?? application?.school_id ?? "School");
+  const school = String(application?.school_name ?? application?.school_id ?? "the school");
 
   return {
     ok: true,
     mode: "fallback",
-    summary: `${applicant} submitted an application for ${school}. The request is ready for admin review, but AI scoring is currently using the fallback mode because no AI API key is configured.`,
-    recommended_status: ["submitted", "in_review", "accepted", "rejected"].includes(status)
-      ? status
-      : "in_review",
+    summary: `Application for ${school} is ready for manual review. AI review is not configured in this environment.`,
+    recommended_status: ALLOWED_STATUSES.includes(status) ? status : "in_review",
     risk_flags: [
       "AI service not configured in this environment",
       "Manual review still required before final approval",
     ],
-    score: 72,
-    reasoning:
-      "Fallback mode provides a safe default recommendation to keep the process moving while reminding staff to verify the application manually.",
+    score: 0,
+    reasoning: "No AI assessment was made. Review the application manually.",
     meta: {
       model: "fallback",
       source: "local-default-review",
@@ -47,30 +46,24 @@ function buildFallbackReview(application?: Record<string, unknown>): ReviewRespo
   };
 }
 
-async function logAuditEvent(event: string, entityType: string, entityId: string | number, actor: string, details: Record<string, unknown>) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) return;
-
-  const supabase = createClient(supabaseUrl, serviceRoleKey);
-
-  await supabase.from("audit_logs").insert({
-    entity_type: entityType,
-    entity_id: String(entityId),
-    event,
-    actor: actor || "system",
-    details: JSON.stringify(details),
-  });
+function withoutPersonalFields(application: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(application).filter(([key]) => !PERSONAL_FIELDS.includes(key)),
+  );
 }
 
 export async function POST(request: NextRequest) {
+  const admin = await requireAdmin(request);
+  if (!admin.ok) {
+    return NextResponse.json({ ok: false, error: admin.error }, { status: admin.status });
+  }
+
   try {
     const body = (await request.json()) as ReviewRequest;
     const application = body.application ?? {};
-    const actor = body.actor ?? "admin";
+    const applicationId = String(application.id ?? "unknown");
 
-    if (!application || Object.keys(application).length === 0) {
+    if (Object.keys(application).length === 0) {
       return NextResponse.json(
         { ok: false, error: "Application payload is required" },
         { status: 400 },
@@ -80,30 +73,32 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-      const fallback = buildFallbackReview(application as Record<string, unknown>);
-      await logAuditEvent("ai_review_fallback", "application", String(application.id ?? "unknown"), actor, {
-        summary: fallback.summary,
-        recommended_status: fallback.recommended_status,
+      const fallback = buildFallbackReview(application);
+      await writeAuditLog(admin.supabase, {
+        event: "ai_review_fallback",
+        entityType: "application",
+        entityId: applicationId,
+        actor: admin.email,
+        details: { recommended_status: fallback.recommended_status },
       });
 
       return NextResponse.json(fallback, { status: 200 });
     }
 
+    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
     const prompt = `
 You are reviewing a school application for an admin dashboard.
-Return valid JSON only with these keys:
-- summary
-- recommended_status
-- risk_flags
-- score
-- reasoning
-
-Use only one of these statuses: submitted, in_review, accepted, rejected.
+Return a JSON object with these keys:
+- summary (string)
+- recommended_status (one of: submitted, in_review, accepted, rejected)
+- risk_flags (array of strings)
+- score (number 0-100)
+- reasoning (string)
 
 Application data:
-${JSON.stringify(application, null, 2)}
+${JSON.stringify(withoutPersonalFields(application), null, 2)}
 
-Consider missing documents, red flags, and school fit.
+Consider missing documents, red flags, and school fit. If information is missing, say so rather than guessing.
 `;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -113,13 +108,14 @@ Consider missing documents, red flags, and school fit.
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model,
         temperature: 0.3,
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
             content:
-              "You are a careful school admissions reviewer. Return concise, structured JSON for admin decision support.",
+              "You are a careful school admissions reviewer. Return concise, structured JSON for admin decision support. Staff make the final decision.",
           },
           { role: "user", content: prompt },
         ],
@@ -128,11 +124,11 @@ Consider missing documents, red flags, and school fit.
 
     if (!response.ok) {
       const errorData = await response.text();
-      throw new Error(`AI request failed: ${response.status} ${errorData}`);
+      throw new Error(`AI request failed: ${response.status} ${errorData.slice(0, 300)}`);
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content ?? "{}";
+    const content: string = data.choices?.[0]?.message?.content ?? "{}";
     let review: Partial<ReviewResponse>;
 
     try {
@@ -145,50 +141,45 @@ Consider missing documents, red flags, and school fit.
     const normalizedReview: ReviewResponse = {
       ok: true,
       mode: "live",
-      summary:
-        typeof review.summary === "string"
-          ? review.summary
-          : "AI review completed successfully.",
+      summary: typeof review.summary === "string" ? review.summary : "AI review completed.",
       recommended_status:
-        typeof review.recommended_status === "string" && ["submitted", "in_review", "accepted", "rejected"].includes(review.recommended_status)
+        typeof review.recommended_status === "string" &&
+        ALLOWED_STATUSES.includes(review.recommended_status)
           ? review.recommended_status
           : "in_review",
       risk_flags: Array.isArray(review.risk_flags)
         ? review.risk_flags.filter((flag): flag is string => typeof flag === "string")
         : [],
-      score:
-        typeof review.score === "number"
-          ? Math.max(0, Math.min(100, review.score))
-          : 75,
-      reasoning:
-        typeof review.reasoning === "string"
-          ? review.reasoning
-          : "AI review completed successfully.",
+      score: typeof review.score === "number" ? Math.max(0, Math.min(100, review.score)) : 0,
+      reasoning: typeof review.reasoning === "string" ? review.reasoning : "",
       meta: {
-        model: "gpt-4o-mini",
+        model,
         source: "openai-chat-completions",
       },
     };
 
-    await logAuditEvent("ai_review_completed", "application", String(application.id ?? "unknown"), actor, {
-      summary: normalizedReview.summary,
-      recommended_status: normalizedReview.recommended_status,
-      score: normalizedReview.score,
+    await writeAuditLog(admin.supabase, {
+      event: "ai_review_completed",
+      entityType: "application",
+      entityId: applicationId,
+      actor: admin.email,
+      details: {
+        recommended_status: normalizedReview.recommended_status,
+        score: normalizedReview.score,
+      },
     });
 
     return NextResponse.json(normalizedReview, { status: 200 });
   } catch (error) {
     console.error("AI review route error:", error);
 
-    const fallback = buildFallbackReview();
     return NextResponse.json(
       {
-        ...fallback,
+        ...buildFallbackReview(),
         ok: false,
-        summary: "The AI review pipeline encountered an error, so the request was routed to fallback review mode.",
-        reasoning: error instanceof Error ? error.message : "Unknown AI processing error",
+        error: "The AI review failed. Review this application manually.",
       },
-      { status: 500 },
+      { status: 502 },
     );
   }
 }

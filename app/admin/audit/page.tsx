@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import supabase from "@/utils/supabaseClient";
+import supabase from "@/lib/supabaseClient";
 
 type AuditEntry = {
   id: number;
@@ -12,36 +12,6 @@ type AuditEntry = {
   details: string | null;
   created_at: string;
 };
-
-const fallbackEntries: AuditEntry[] = [
-  {
-    id: 1,
-    event: "ai_review_generated",
-    entity_type: "application",
-    entity_id: "12",
-    actor: "admin-user",
-    details: '{"status":"submitted","school":"Northview Academy"}',
-    created_at: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
-  },
-  {
-    id: 2,
-    event: "status_updated",
-    entity_type: "application",
-    entity_id: "12",
-    actor: "admin-user",
-    details: '{"next_status":"in_review","source":"ai_recommendation"}',
-    created_at: new Date(Date.now() - 1000 * 60 * 32).toISOString(),
-  },
-  {
-    id: 3,
-    event: "ai_review_generated",
-    entity_type: "application",
-    entity_id: "23",
-    actor: "admin-user",
-    details: '{"status":"accepted","school":"Summit School"}',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-  },
-];
 
 const parseDetails = (raw: string | null) => {
   if (!raw) return {} as Record<string, unknown>;
@@ -55,6 +25,7 @@ const parseDetails = (raw: string | null) => {
 export default function AuditPage() {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     const loadAudit = async () => {
@@ -66,15 +37,15 @@ export default function AuditPage() {
           .limit(50);
 
         if (error) {
-          console.error("Audit fetch failed, using fallback data:", error);
-          setEntries(fallbackEntries);
+          console.error("Audit fetch failed:", error);
+          setLoadError(error.message || "Could not load the audit log");
           return;
         }
 
-        setEntries((data as AuditEntry[]) || fallbackEntries);
+        setEntries((data as AuditEntry[]) ?? []);
       } catch (error) {
         console.error("Unexpected audit load error:", error);
-        setEntries(fallbackEntries);
+        setLoadError("Could not load the audit log");
       } finally {
         setLoading(false);
       }
@@ -95,6 +66,10 @@ export default function AuditPage() {
           {[...Array(5)].map((_, index) => (
             <div key={index} className="h-12 animate-pulse rounded-xl bg-slate-200" />
           ))}
+        </div>
+      ) : loadError ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {loadError}
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -133,6 +108,13 @@ export default function AuditPage() {
                   </tr>
                 );
               })}
+              {!entries.length && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                    No activity recorded yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
