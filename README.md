@@ -15,11 +15,12 @@ Built with Next.js, Supabase (database + sign-in) and, optionally, OpenAI.
 4. Make yourself an admin. In the SQL Editor run (with your email):
 
    ```sql
-   update public.users set role = 'admin' where lower(email) = lower('you@example.com');
+   insert into public.users (email, full_name, role)
+   values ('you@example.com', 'Your Name', 'admin')
+   on conflict (email) do update set role = 'admin';
    ```
 
-   Your sign-in account (Authentication -> Users) must use the same email as
-   your row in the `users` table.
+   Use the same email as your sign-in account (Authentication -> Users).
 
 ## 2. Run it on your computer
 

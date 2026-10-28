@@ -4,21 +4,24 @@ import { useEffect, useState } from "react";
 import supabase from "@/lib/supabaseClient";
 
 type AuditEntry = {
-  id: number;
+  id: string; // uuid
   event: string;
   entity_type: string;
   entity_id: string;
   actor: string;
-  details: string | null;
+  details: unknown;
   created_at: string;
 };
 
-const parseDetails = (raw: string | null) => {
-  if (!raw) return {} as Record<string, unknown>;
+// details is jsonb: usually an object, but older rows may hold a JSON string.
+const parseDetails = (raw: unknown): Record<string, unknown> => {
+  if (raw && typeof raw === "object") return raw as Record<string, unknown>;
+  if (typeof raw !== "string" || !raw) return {};
   try {
-    return JSON.parse(raw) as Record<string, unknown>;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
   } catch {
-    return {} as Record<string, unknown>;
+    return {};
   }
 };
 

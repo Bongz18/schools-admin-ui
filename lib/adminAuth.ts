@@ -78,7 +78,8 @@ export async function writeAuditLog(
     entity_id: String(entry.entityId),
     event: entry.event,
     actor: entry.actor,
-    details: entry.details ? JSON.stringify(entry.details) : null,
+    // audit_logs.details is a jsonb column, so store the object itself.
+    details: entry.details ?? null,
   });
 
   if (error) {
