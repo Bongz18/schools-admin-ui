@@ -21,7 +21,7 @@ type Review = {
 };
 
 type Application = {
-  id: number;
+  id: string; // uuid
   parent_id: number | string;
   school_id: number | string;
   status: string;
@@ -49,7 +49,7 @@ export default function ApplicationsPage() {
   const [schoolFilter, setSchoolFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [reviewResults, setReviewResults] = useState<Record<string, Review>>({});
-  const [reviewingId, setReviewingId] = useState<number | null>(null);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
 
   const pageSize = 10;
 
