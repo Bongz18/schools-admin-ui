@@ -2,6 +2,7 @@
 
 import { toast } from "react-hot-toast";
 import { COMPARE_LIMIT, useCompareList } from "@/lib/compare";
+import { trackSchoolEvent } from "@/lib/track";
 
 export default function CompareToggle({ schoolId, size = "sm" }: { schoolId: string; size?: "sm" | "md" }) {
   const { ids, add, remove } = useCompareList();
@@ -14,7 +15,9 @@ export default function CompareToggle({ schoolId, size = "sm" }: { schoolId: str
     }
     if (!add(schoolId)) {
       toast.error(`You can compare up to ${COMPARE_LIMIT} schools. Remove one first.`);
+      return;
     }
+    trackSchoolEvent(schoolId, "compare_add");
   };
 
   const base =
