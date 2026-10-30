@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Schools Admin",
-  description: "School admissions and administration dashboard",
+  title: "SchoolSpot Zimbabwe",
+  description: "Find and compare schools across Zimbabwe.",
 };
 
 export default function RootLayout({

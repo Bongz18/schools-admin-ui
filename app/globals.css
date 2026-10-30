@@ -163,3 +163,24 @@
   }
 }
 }
+/* SchoolSpot Zimbabwe brand tokens (msasa palette) */
+@theme {
+  --color-ink: #17251f;
+  --color-paper: #f6f7f3;
+  --color-leaf: #2f6b4f;
+  --color-leaf-dark: #1f4a37;
+  --color-leaf-soft: #e3eee7;
+  --color-msasa: #8c2433;
+  --color-msasa-soft: #f6e4e6;
+  --color-granite: #5f655e;
+  --color-line: #dde1d9;
+}
+
+@theme inline {
+  --font-display: var(--font-bricolage, ui-sans-serif), system-ui, sans-serif;
+  --font-body: var(--font-atkinson, ui-sans-serif), system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 
 const NAV_ITEMS = [
   { href: "/admin/applications", label: "Applications" },
+  { href: "/admin/enquiries", label: "Enquiries" },
   { href: "/admin/schools", label: "Schools" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/audit", label: "Audit log" },
@@ -93,7 +94,7 @@ export default function AdminLayoutGate({ children }: { children: React.ReactNod
       <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-6">
-            <h2 className="text-lg font-semibold">Schools Admin</h2>
+            <h2 className="text-lg font-semibold">SchoolSpot Admin</h2>
             <nav className="flex flex-wrap gap-1 text-sm">
               {NAV_ITEMS.map((item) => {
                 const active = pathname?.startsWith(item.href);
