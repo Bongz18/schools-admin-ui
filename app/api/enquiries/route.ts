@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/adminAuth";
+import { sendEnquiryAlert } from "@/lib/notify";
 
 // Public endpoint: a parent sends an enquiry about a published school.
 // Validates input, ignores bots (honeypot), and saves with the service role.
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   const { data: school } = await supabase
     .from("schools")
-    .select("id")
+    .select("id, name")
     .eq("id", schoolId)
     .eq("status", "published")
     .maybeSingle();
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "This school couldn't be found." }, { status: 404 });
   }
 
-  const { error } = await supabase.from("enquiries").insert({
+  const enquiry = {
     school_id: schoolId,
     parent_name: parentName,
     email: email || null,
@@ -77,12 +78,24 @@ export async function POST(request: NextRequest) {
     child_grade: clean(body.childGrade, LIMITS.childGrade) || null,
     intake: clean(body.intake, LIMITS.intake) || null,
     message: clean(body.message, LIMITS.message) || null,
-  });
+  };
+  const { error } = await supabase.from("enquiries").insert(enquiry);
 
   if (error) {
     console.error("Enquiry insert failed:", error.message);
     return NextResponse.json({ ok: false, error: "Your enquiry wasn't sent. Try again." }, { status: 500 });
   }
+
+  // Email the SchoolSpot team (does nothing until email alerts are configured).
+  await sendEnquiryAlert({
+    schoolName: (school as { name?: string }).name ?? "a school",
+    parentName: enquiry.parent_name,
+    email: enquiry.email,
+    phone: enquiry.phone,
+    childGrade: enquiry.child_grade,
+    intake: enquiry.intake,
+    message: enquiry.message,
+  });
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

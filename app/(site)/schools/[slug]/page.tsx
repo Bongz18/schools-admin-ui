@@ -4,6 +4,7 @@ import { publicSupabase } from "@/lib/supabaseServer";
 import { SCHOOL_COLUMNS, type School, feeSummary, locationLine } from "@/lib/schools";
 import SchoolProfileView from "@/components/site/SchoolProfileView";
 import EnquiryForm from "@/components/site/EnquiryForm";
+import TrackView from "@/components/site/TrackView";
 
 export const revalidate = 60;
 
@@ -34,6 +35,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
 
   return (
     <SchoolProfileView school={school}>
+      <TrackView schoolId={school.id} />
       <section aria-labelledby="enquire" className="mt-14 max-w-2xl">
         <h2 id="enquire" className="font-display text-2xl font-semibold text-ink">
           Ask {school.name} a question
