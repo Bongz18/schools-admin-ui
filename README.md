@@ -1,7 +1,15 @@
-# Schools Admin
+# SchoolSpot Zimbabwe
 
-Admissions dashboard for school staff: manage applications, schools and users,
-get an AI summary of an application, and keep an audit log of every change.
+Find and compare schools across Zimbabwe. Live at https://schools-admin-ui.vercel.app
+
+- **Public site** (`app/(site)`): homepage search, school directory with filters,
+  school profiles, side-by-side compare (up to 3), and an enquiry form.
+- **Admin dashboard** (`/admin`): verify and publish schools, read parent enquiries,
+  manage applications, and review the audit log.
+
+Schools start as hidden drafts. An admin checks the details with the school, marks
+the school **verified**, then **publishes** it. Only published schools are visible
+to the public (enforced by database rules in `supabase/schoolspot.sql`).
 
 Built with Next.js, Supabase (database + sign-in) and, optionally, OpenAI.
 

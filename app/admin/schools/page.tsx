@@ -1,68 +1,98 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import supabase from "@/lib/supabaseClient";
+import { adminFetch } from "@/lib/adminFetch";
 import { toast } from "react-hot-toast";
+import { feeSummary, locationLine } from "@/lib/schools";
 
-type School = {
-  id: number | string;
-  name?: string | null;
-  created_at?: string | null;
+type SchoolRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  suburb: string | null;
+  city: string | null;
+  fees_text: string | null;
+  fee_term_min_usd: number | null;
+  fee_term_max_usd: number | null;
+  verified: boolean;
+  status: string;
 };
 
 export default function SchoolsPage() {
-  const [schools, setSchools] = useState<School[]>([]);
+  const [schools, setSchools] = useState<SchoolRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const fetchSchools = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.from("schools").select("id, name, created_at").order("created_at", {
-        ascending: false,
-      });
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("schools")
+      .select("id, name, slug, suburb, city, fees_text, fee_term_min_usd, fee_term_max_usd, verified, status")
+      .order("name", { ascending: true });
 
-      if (error) {
-        console.error("Failed to fetch schools:", error);
-        toast.error("Failed to load schools");
-        setSchools([]);
-        return;
-      }
-
-      setSchools((data ?? []) as School[]);
-    } catch (error) {
-      console.error("Unexpected schools fetch error:", error);
-      toast.error("Unexpected schools fetch error");
-    } finally {
-      setLoading(false);
+    if (error) {
+      console.error("Failed to fetch schools:", error);
+      toast.error("Schools couldn't be loaded. Refresh to try again.");
+      setSchools([]);
+    } else {
+      setSchools((data ?? []) as SchoolRow[]);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchSchools();
   }, []);
 
-  const filteredSchools = schools.filter((school) => {
-    const name = school.name ?? "";
-    return name.toLowerCase().includes(search.toLowerCase());
-  });
+  const update = async (school: SchoolRow, change: { verified?: boolean; status?: string }, message: string) => {
+    setSavingId(school.id);
+    const response = await adminFetch(`/api/admin/schools/${school.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(change),
+    });
+    const result = await response.json().catch(() => ({}));
+    setSavingId(null);
+
+    if (!response.ok) {
+      toast.error(result?.error ?? "That change wasn't saved.");
+      return;
+    }
+    toast.success(message);
+    setSchools((current) =>
+      current.map((row) => (row.id === school.id ? { ...row, verified: result.verified, status: result.status } : row)),
+    );
+  };
+
+  const filtered = schools.filter((school) => school.name.toLowerCase().includes(search.toLowerCase()));
+  const publishedCount = schools.filter((s) => s.status === "published").length;
+  const verifiedCount = schools.filter((s) => s.verified).length;
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500">Operations</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">Schools</h1>
-      </div>
-
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Schools</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            {schools.length} schools · {verifiedCount} verified · {publishedCount} live on SchoolSpot
+          </p>
+        </div>
         <input
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search schools"
-          className="w-full rounded border border-slate-300 px-3 py-2 md:max-w-sm"
+          className="w-full rounded border border-slate-300 bg-white px-3 py-2 md:max-w-xs"
         />
       </div>
+
+      <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        Check a school&apos;s details with the school first, then click <strong>Mark verified</strong>. Only verified
+        schools can be published. Use <strong>Preview</strong> to see a draft exactly as parents will.
+      </p>
 
       {loading ? (
         <div className="space-y-3">
@@ -71,29 +101,96 @@ export default function SchoolsPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
-                <th className="px-4 py-3">ID</th>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Created</th>
+                <th className="px-4 py-3">School</th>
+                <th className="px-4 py-3">Fees</th>
+                <th className="px-4 py-3">Checked</th>
+                <th className="px-4 py-3">On SchoolSpot</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSchools.map((school) => (
-                <tr key={String(school.id)} className="border-t border-slate-200">
-                  <td className="px-4 py-3 text-slate-800">#{String(school.id)}</td>
-                  <td className="px-4 py-3 text-slate-700">{school.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {school.created_at ? new Date(school.created_at).toLocaleDateString() : "—"}
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((school) => {
+                const busy = savingId === school.id;
+                const live = school.status === "published";
+                return (
+                  <tr key={school.id} className="border-t border-slate-200 align-top">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-slate-900">{school.name}</div>
+                      <div className="text-slate-500">{locationLine(school)}</div>
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">{feeSummary(school)}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                          school.verified ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {school.verified ? "Verified" : "Not verified"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {live && school.slug ? (
+                        <a href={`/schools/${school.slug}`} target="_blank" rel="noopener noreferrer" className="text-sky-700 underline">
+                          Live
+                        </a>
+                      ) : (
+                        <span className="text-slate-500">Hidden draft</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Link
+                          href={`/admin/schools/${school.id}/preview`}
+                          className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          Preview
+                        </Link>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() =>
+                            school.verified
+                              ? window.confirm(
+                                  live
+                                    ? `Unverifying ${school.name} will also hide it from SchoolSpot. Continue?`
+                                    : `Mark ${school.name} as not verified?`,
+                                ) && update(school, { verified: false }, "Marked not verified")
+                              : window.confirm(`Have you checked ${school.name}'s details with the school?`) &&
+                                update(school, { verified: true }, "Marked verified")
+                          }
+                          className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                        >
+                          {school.verified ? "Unverify" : "Mark verified"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy || (!school.verified && !live)}
+                          title={!school.verified && !live ? "Verify this school first" : undefined}
+                          onClick={() =>
+                            live
+                              ? update(school, { status: "draft" }, "Hidden from SchoolSpot")
+                              : window.confirm(`Publish ${school.name}? Parents will be able to see it.`) &&
+                                update(school, { status: "published" }, "Published")
+                          }
+                          className={`rounded px-2 py-1 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 ${
+                            live ? "border border-slate-300 text-slate-700 hover:bg-slate-50" : "bg-emerald-700 text-white hover:bg-emerald-800"
+                          }`}
+                        >
+                          {live ? "Hide" : "Publish"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
 
-              {!filteredSchools.length && (
+              {!filtered.length && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
                     No schools found.
                   </td>
                 </tr>
