@@ -18,7 +18,7 @@ export async function sendEnquiryAlert(enquiry: EnquiryAlert) {
   if (!apiKey || !to) return;
 
   const from = process.env.ALERT_FROM_EMAIL || "SchoolSpot Zimbabwe <onboarding@resend.dev>";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://schools-admin-ui.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.schoolspot.co.zw";
 
   const lines = [
     `New enquiry via SchoolSpot Zimbabwe`,
