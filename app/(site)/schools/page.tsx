@@ -9,6 +9,7 @@ import {
   SCHOOL_COLUMNS,
   type School,
   applyFilters,
+  SECTOR_OPTIONS,
   feeSummary,
   formatUsd,
   locationLine,
@@ -19,7 +20,7 @@ import CompareToggle from "@/components/site/CompareToggle";
 
 export const metadata: Metadata = {
   title: "Find a school | SchoolSpot Zimbabwe",
-  description: "Search and filter schools in Zimbabwe by city, fees, boarding and curriculum.",
+  description: "Search and filter schools in Zimbabwe by city, fees, boarding, curriculum and type of school.",
 };
 
 export const revalidate = 60;
@@ -49,7 +50,7 @@ export default async function SchoolsPage({
     <div className="mx-auto max-w-5xl px-4 pb-24 pt-10">
       <h1 className="font-display text-4xl font-bold tracking-tight text-ink">Find a school</h1>
 
-      <form method="get" className="mt-6 grid gap-4 rounded-2xl border border-line bg-white p-5 sm:grid-cols-3 lg:grid-cols-6">
+      <form method="get" className="mt-6 grid gap-4 rounded-2xl border border-line bg-white p-5 sm:grid-cols-3 lg:grid-cols-4">
         <div className="sm:col-span-3 lg:col-span-2">
           <label htmlFor="q" className={label}>School name or area</label>
           <input id="q" name="q" defaultValue={filters.q ?? ""} placeholder="e.g. Borrowdale" className={field} />
@@ -81,6 +82,15 @@ export default async function SchoolsPage({
           </select>
         </div>
         <div>
+          <label htmlFor="sector" className={label}>Type of school</label>
+          <select id="sector" name="sector" defaultValue={filters.sector ?? ""} className={field}>
+            <option value="">Any</option>
+            {SECTOR_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
           <label htmlFor="maxfee" className={label}>Fees up to (a term)</label>
           <select id="maxfee" name="maxfee" defaultValue={filters.maxfee ?? ""} className={field}>
             <option value="">Any</option>
@@ -105,7 +115,7 @@ export default async function SchoolsPage({
             <option value="fee">Lowest fees first</option>
           </select>
         </div>
-        <div className="flex items-end gap-3 sm:col-span-3 lg:col-span-4">
+        <div className="flex items-end gap-3 sm:col-span-3 lg:col-span-2">
           <button
             type="submit"
             className="rounded-full bg-leaf px-6 py-2.5 font-semibold text-white hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"

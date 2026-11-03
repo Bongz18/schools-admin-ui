@@ -52,6 +52,13 @@ export const TYPE_LABELS: Record<string, string> = {
   international: "International",
 };
 
+/** Broad groups parents filter by. Each group covers one or more school_type values. */
+export const SECTOR_OPTIONS: { value: string; label: string; types: string[] }[] = [
+  { value: "private", label: "Private / independent", types: ["private", "trust", "international"] },
+  { value: "government", label: "Government", types: ["government"] },
+  { value: "mission", label: "Mission / church", types: ["mission"] },
+];
+
 export const CURRICULUM_OPTIONS = ["Cambridge", "ZIMSEC", "IB", "British"];
 
 export const FEE_OPTIONS = [500, 1000, 1500, 2000, 3000, 4000, 6000];
@@ -83,6 +90,7 @@ export type SchoolFilters = {
   city?: string;
   gender?: string;
   boarding?: string;
+  sector?: string;
   curriculum?: string;
   maxfee?: string;
   sort?: string;
@@ -99,6 +107,7 @@ export function readFilters(params: Record<string, string | string[] | undefined
     city: pick("city"),
     gender: pick("gender"),
     boarding: pick("boarding"),
+    sector: pick("sector"),
     curriculum: pick("curriculum"),
     maxfee: pick("maxfee"),
     sort: pick("sort"),
@@ -124,6 +133,10 @@ export function applyFilters(schools: School[], filters: SchoolFilters) {
     }
     if (filters.boarding === "day" && !(school.boarding === "day" || school.boarding === "day_boarding")) {
       return false;
+    }
+    if (filters.sector) {
+      const group = SECTOR_OPTIONS.find((option) => option.value === filters.sector);
+      if (group && !(school.school_type && group.types.includes(school.school_type))) return false;
     }
     if (filters.curriculum && !(school.curriculum ?? []).includes(filters.curriculum)) return false;
     if (maxFee && !Number.isNaN(maxFee)) {
