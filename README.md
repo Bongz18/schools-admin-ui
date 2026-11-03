@@ -1,6 +1,6 @@
 # SchoolSpot Zimbabwe
 
-Find and compare schools across Zimbabwe. Live at https://schools-admin-ui.vercel.app
+Find and compare schools across Zimbabwe. Live at https://www.schoolspot.co.zw
 
 - **Public site** (`app/(site)`): homepage search, school directory with filters,
   school profiles, side-by-side compare (up to 3), and an enquiry form.
