@@ -39,7 +39,7 @@ export default async function SchoolsPage({
 
   const all = (data ?? []) as unknown as School[];
   const schools = applyFilters(all, filters);
-  const cities = Array.from(new Set(all.map((s) => s.city).filter((c): c is string => !!c))).sort();
+  const cities = Array.from(new Set(["Harare", ...all.map((s) => s.city).filter((c): c is string => !!c)])).sort();
   const hasFilters = Object.entries(filters).some(([key, value]) => key !== "sort" && value);
 
   const field =
