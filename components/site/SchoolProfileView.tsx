@@ -3,8 +3,20 @@ import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, locationLine } from "@/lib
 import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
+import SchoolCrest from "@/components/site/SchoolCrest";
+import { sectionClass, sectionHeading } from "@/lib/ui";
 
-// The body of a school profile. Used by the public page and by the admin draft preview.
+
+function CheckMark() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true" className="h-4 w-4 shrink-0 text-brass">
+      <circle cx="8" cy="8" r="7.25" fill="none" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4.8 8.3l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// The body of a school profile. Used by the public page, the admin preview and the school's private preview link.
 export default function SchoolProfileView({
   school,
   results = [],
@@ -14,113 +26,159 @@ export default function SchoolProfileView({
   results?: ExamResult[];
   children?: React.ReactNode;
 }) {
-  const facts: { label: string; value: string | null }[] = [
+  const pupils = school.gender
+    ? `${GENDER_LABELS[school.gender] ?? school.gender}${school.gender_note ? ` (${school.gender_note})` : ""}`
+    : null;
+  const keyFacts: { label: string; value: string | null }[] = [
     { label: "Levels", value: school.levels },
-    {
-      label: "Pupils",
-      value: school.gender
-        ? `${GENDER_LABELS[school.gender] ?? school.gender}${school.gender_note ? ` (${school.gender_note})` : ""}`
-        : null,
-    },
+    { label: "Pupils", value: pupils },
     { label: "Day or boarding", value: school.boarding ? BOARDING_LABELS[school.boarding] ?? school.boarding : null },
     { label: "Curriculum", value: school.curriculum && school.curriculum.length ? school.curriculum.join(", ") : null },
+  ];
+  const about: { label: string; value: string | null }[] = [
     { label: "Type of school", value: school.school_type ? TYPE_LABELS[school.school_type] ?? school.school_type : null },
     { label: "Religious ethos", value: school.religion },
     { label: "Founded", value: school.founded },
     { label: "Location", value: locationLine(school) },
   ];
 
-  const website = school.website
-    ? school.website.startsWith("http")
-      ? school.website
-      : `https://${school.website}`
-    : null;
+  const website = school.website ? (school.website.startsWith("http") ? school.website : `https://${school.website}`) : null;
+  const websiteLabel = school.website?.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+  const contactRows: { label: string; value: React.ReactNode }[] = [];
+  if (school.address) contactRows.push({ label: "Address", value: school.address });
+  if (school.phone) contactRows.push({ label: "Phone", value: school.phone });
+  if (school.email)
+    contactRows.push({
+      label: "Email",
+      value: <a href={`mailto:${school.email}`} className="break-all underline decoration-line underline-offset-4 hover:decoration-leaf">{school.email}</a>,
+    });
+  for (const contact of school.contacts ?? []) {
+    contactRows.push({
+      label: contact.label,
+      value: <a href={`mailto:${contact.email}`} className="break-all underline decoration-line underline-offset-4 hover:decoration-leaf">{contact.email}</a>,
+    });
+  }
+  if (website)
+    contactRows.push({
+      label: "Website",
+      value: (
+        <a href={website} target="_blank" rel="noopener noreferrer" className="break-all underline decoration-line underline-offset-4 hover:decoration-leaf">
+          {websiteLabel}
+        </a>
+      ),
+    });
 
   return (
-    <article className="mx-auto max-w-5xl px-4 pb-24 pt-10 sm:pt-14">
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-2xl">
-          <p className="text-granite">{locationLine(school)}</p>
-          <h1 className="mt-1 font-display text-4xl font-bold leading-tight tracking-tight text-ink sm:text-5xl">
-            {school.name}
-          </h1>
-          {school.description && <p className="mt-4 text-lg leading-relaxed text-ink/85">{school.description}</p>}
-        </div>
-        <CompareToggle schoolId={school.id} size="md" />
-      </header>
+    <article className="pb-24">
+      <header className="border-b border-line bg-white">
+        <div className="mx-auto max-w-6xl px-5 pb-10 pt-12 sm:px-8 sm:pt-16">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+            <SchoolCrest name={school.name} />
+            <div className="min-w-0">
+              <p className="text-[0.95rem] text-granite">{locationLine(school)}</p>
+              <h1 className="mt-1 font-display text-[2.4rem] leading-[1.08] tracking-tight text-ink sm:text-[3.4rem]">
+                {school.name}
+              </h1>
+              <p className="mt-3 flex items-center gap-2 text-sm text-granite">
+                {school.verified ? (
+                  <>
+                    <CheckMark />
+                    Details confirmed by the school
+                  </>
+                ) : (
+                  "Details from public sources, not yet confirmed by the school"
+                )}
+              </p>
+            </div>
+          </div>
 
-      <FeesSection school={school} />
+          {school.description && (
+            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-ink/80">{school.description}</p>
+          )}
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_minmax(0,22rem)]">
-        <section aria-labelledby="facts">
-          <h2 id="facts" className="font-display text-2xl font-semibold text-ink">
-            At a glance
-          </h2>
-          <dl className="mt-4 divide-y divide-line border-y border-line">
-            {facts.map((fact) => (
-              <div key={fact.label} className="grid grid-cols-[10rem_1fr] gap-4 py-3">
-                <dt className="text-granite">{fact.label}</dt>
-                <dd className={fact.value ? "text-ink" : "text-granite/70 italic"}>{fact.value ?? "Not listed yet"}</dd>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <CompareToggle schoolId={school.id} size="md" />
+            {children && (
+              <a
+                href="#enquire"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf"
+              >
+                Ask the school a question
+              </a>
+            )}
+          </div>
+
+          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-line pt-8 lg:grid-cols-4">
+            {keyFacts.map((fact) => (
+              <div key={fact.label}>
+                <dt className="text-sm text-granite">{fact.label}</dt>
+                <dd className={`mt-1 leading-snug ${fact.value ? "font-medium text-ink" : "text-granite/70"}`}>
+                  {fact.value ?? "Not listed yet"}
+                </dd>
               </div>
             ))}
           </dl>
-        </section>
+        </div>
+      </header>
 
-        <aside className="space-y-4">
-          <div className="rounded-2xl border border-line bg-white p-5">
-            <h2 className="font-display text-lg font-semibold text-ink">Contact the school</h2>
-            <ul className="mt-3 space-y-2 text-ink">
-              {school.address && <li>Address: {school.address}</li>}
-              {website && (
-                <li>
-                  <a href={website} target="_blank" rel="noopener noreferrer" className="text-leaf underline hover:text-leaf-dark">
-                    Visit the school&apos;s website
-                  </a>
-                </li>
-              )}
-              {school.phone && <li>Phone: {school.phone}</li>}
-              {school.email && <li>Email: {school.email}</li>}
-              {(school.contacts ?? []).map((contact) => (
-                <li key={contact.email}>
-                  {contact.label}:{" "}
-                  <a href={`mailto:${contact.email}`} className="break-all text-leaf underline hover:text-leaf-dark">
-                    {contact.email}
-                  </a>
-                </li>
+      <div className="mx-auto mt-12 grid max-w-6xl gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
+        <div className="min-w-0">
+          <FeesSection school={school} />
+
+          {school.highlights && school.highlights.length > 0 && (
+            <section aria-labelledby="highlights" className={sectionClass}>
+              <h2 id="highlights" className={sectionHeading}>
+                Highlights
+              </h2>
+              <ul className="mt-5 max-w-2xl space-y-3">
+                {school.highlights.map((item) => (
+                  <li key={item} className="flex gap-3 leading-relaxed text-ink/85">
+                    <span aria-hidden="true" className="mt-[0.7rem] h-px w-4 shrink-0 bg-brass" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <ExamResultsSection results={results} />
+
+          <section aria-labelledby="about" className={sectionClass}>
+            <h2 id="about" className={sectionHeading}>
+              About the school
+            </h2>
+            <dl className="mt-5 divide-y divide-line border-y border-line">
+              {about.map((fact) => (
+                <div key={fact.label} className="grid grid-cols-[9.5rem_1fr] gap-4 py-3">
+                  <dt className="text-granite">{fact.label}</dt>
+                  <dd className={fact.value ? "text-ink" : "text-granite/70"}>{fact.value ?? "Not listed yet"}</dd>
+                </div>
               ))}
-              {!school.address && !website && !school.phone && !school.email && (
-                <li className="text-granite">Use the enquiry form and we&apos;ll put you in touch.</li>
-              )}
-            </ul>
+            </dl>
+          </section>
+
+          {children}
+        </div>
+
+        <aside className="lg:sticky lg:top-8 lg:self-start">
+          <div className="rounded-2xl border border-line bg-white p-6">
+            <h2 className="font-display text-[1.4rem] leading-tight text-ink">Contact the school</h2>
+            {contactRows.length ? (
+              <dl className="mt-5 space-y-4 text-[0.95rem]">
+                {contactRows.map((row, index) => (
+                  <div key={index}>
+                    <dt className="text-sm text-granite">{row.label}</dt>
+                    <dd className="mt-0.5 text-ink">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className="mt-4 text-[0.95rem] text-granite">Use the enquiry form and we&apos;ll put you in touch.</p>
+            )}
           </div>
-          <p
-            className={`rounded-2xl p-5 text-sm ${
-              school.verified ? "bg-leaf-soft text-leaf-dark" : "bg-msasa-soft text-msasa"
-            }`}
-          >
-            {school.verified
-              ? "SchoolSpot has checked these details with the school."
-              : "These details come from public sources and haven't been confirmed by the school yet."}
-          </p>
         </aside>
       </div>
-
-      {school.highlights && school.highlights.length > 0 && (
-        <section aria-labelledby="highlights" className="mt-12">
-          <h2 id="highlights" className="font-display text-2xl font-semibold text-ink">
-            Highlights
-          </h2>
-          <ul className="mt-4 max-w-3xl list-disc space-y-2 pl-5 text-ink/90 marker:text-leaf">
-            {school.highlights.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <ExamResultsSection results={results} />
-
-      {children}
     </article>
   );
 }

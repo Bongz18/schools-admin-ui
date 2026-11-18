@@ -33,7 +33,7 @@ export default function CompareToggle({ schoolId, size = "sm" }: { schoolId: str
       className={`${base} border font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf ${
         selected
           ? "border-leaf bg-leaf text-white hover:bg-leaf-dark"
-          : "border-line bg-white text-ink hover:border-leaf"
+          : "border-ink/15 bg-white text-ink hover:border-leaf"
       }`}
     >
       {selected ? "Added to compare" : "Add to compare"}

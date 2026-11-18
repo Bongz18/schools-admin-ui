@@ -1,6 +1,7 @@
 import type { School } from "@/lib/schools";
 import { feeSummary } from "@/lib/schools";
 import { formatAmount, lowestBaseFee } from "@/lib/fees";
+import { sectionClass, sectionHeading } from "@/lib/ui";
 
 // Fees on a school profile. Styled like the other sections ("At a glance", "Exam results"):
 // a section heading with a small "From ... a term" tag, then one compact table per fee group
@@ -17,13 +18,13 @@ export default function FeesSection({ school }: { school: School }) {
   const currencyPending = groups.length > 0 && !currency;
 
   return (
-    <section aria-labelledby="fees" className="mt-12">
+    <section aria-labelledby="fees" className={sectionClass}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h2 id="fees" className="font-display text-2xl font-semibold text-ink">
+        <h2 id="fees" className={sectionHeading}>
           Fees per term
         </h2>
         {summary && (
-          <span className="rounded-full bg-leaf-soft px-3 py-1 text-sm font-semibold text-leaf-dark">{summary}</span>
+          <span className="rounded-full bg-leaf px-3.5 py-1 text-sm font-medium text-white">{summary}</span>
         )}
         {currencyPending && (
           <span className="rounded-full border border-line px-3 py-1 text-xs font-medium text-granite">
@@ -33,13 +34,13 @@ export default function FeesSection({ school }: { school: School }) {
       </div>
 
       {groups.length > 0 && (
-        <div className={`mt-4 grid gap-4 ${groups.length > 1 ? "md:grid-cols-2" : ""}`}>
+        <div className={`mt-6 grid gap-4 ${groups.length > 1 ? "xl:grid-cols-2" : ""}`}>
           {groups.map((group) => {
             const showHeader = group.columns.length > 1;
             const width = Math.max(1, group.columns.length, ...group.rows.map((r) => r.amounts.length));
             return (
-              <div key={group.title} className="rounded-2xl border border-line bg-white p-5">
-                <h3 className="font-display text-base font-semibold text-ink">{group.title}</h3>
+              <div key={group.title} className="rounded-2xl border border-line bg-white p-6">
+                <h3 className="font-semibold text-ink">{group.title}</h3>
                 {group.note && <p className="mt-1 text-sm leading-snug text-granite">{group.note}</p>}
                 <table className="mt-3 w-full text-left text-sm">
                   {showHeader && (

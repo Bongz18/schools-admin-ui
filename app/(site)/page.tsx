@@ -11,8 +11,22 @@ async function getStats() {
   return { count: rows.length, cities };
 }
 
+// The search reads as a sentence; each choice is an underlined word the parent can change.
 const select =
-  "mx-1 my-1 inline-block appearance-none rounded-lg border-b-2 border-leaf bg-leaf-soft px-3 py-1 font-display font-semibold text-leaf-dark focus:outline-none focus:ring-2 focus:ring-leaf/40 cursor-pointer";
+  "mx-1 inline-block cursor-pointer appearance-none rounded-none border-0 border-b border-brass bg-transparent px-1 pb-0.5 font-display text-leaf hover:border-leaf focus:border-leaf focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf/30";
+
+const STEPS = [
+  { title: "Search", body: "Filter by city, fees, boarding and whether the school takes girls, boys or both." },
+  { title: "Compare", body: "Put up to three schools side by side: fees, curriculum, boarding and results on one screen." },
+  { title: "Enquire", body: "Send one message from SchoolSpot and hear back about places, fees and open days." },
+];
+
+const PROFILE_INCLUDES = [
+  "Fees for every level, with boarding set out clearly",
+  "Exam results, year by year",
+  "Highlights: new subjects, sports and cultural achievements",
+  "Direct emails for admissions and each division",
+];
 
 export default async function HomePage() {
   const { count, cities } = await getStats();
@@ -20,13 +34,16 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="mx-auto max-w-5xl px-4 pb-16 pt-14 sm:pt-20">
-        <h1 className="max-w-3xl font-display text-4xl font-bold leading-[1.1] tracking-tight text-ink sm:text-6xl">
-          Find the right school in Zimbabwe, then compare before you apply.
+      <section className="mx-auto max-w-6xl px-5 pb-20 pt-16 sm:px-8 sm:pt-24">
+        <h1 className="max-w-3xl font-display text-[2.75rem] leading-[1.05] tracking-tight text-ink sm:text-[4.25rem]">
+          Find the right school in Zimbabwe.
         </h1>
+        <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/75">
+          Fees, boarding, results and contacts for schools across the country, checked with the schools themselves.
+        </p>
 
-        <form action="/schools" method="get" className="mt-10 max-w-4xl rounded-3xl border border-line bg-white p-6 sm:p-8">
-          <p className="text-xl leading-loose text-ink sm:text-2xl sm:leading-loose">
+        <form action="/schools" method="get" className="mt-12 max-w-4xl rounded-2xl border border-line bg-white p-7 sm:p-10">
+          <p className="font-display text-[1.6rem] leading-[1.9] text-ink sm:text-[2rem] sm:leading-[1.8]">
             I&apos;m looking for a
             <label className="sr-only" htmlFor="gender">Girls, boys or co-ed</label>
             <select id="gender" name="gender" defaultValue="" className={select}>
@@ -59,57 +76,70 @@ export default async function HomePage() {
             </select>
             a term.
           </p>
-          <button
-            type="submit"
-            className="mt-6 rounded-full bg-msasa px-7 py-3 font-semibold text-white hover:bg-[#721c29] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-msasa"
-          >
-            Show me schools
-          </button>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <button
+              type="submit"
+              className="rounded-full bg-leaf px-7 py-3 font-semibold text-white hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
+            >
+              Show me schools
+            </button>
+            <p className="text-[0.95rem] text-granite">
+              {count > 0
+                ? `${count} ${count === 1 ? "school" : "schools"} listed, with more added every week.`
+                : "We're confirming our first schools with them now. Listings open soon."}
+            </p>
+          </div>
         </form>
-
-        <p className="mt-5 text-granite">
-          {count > 0
-            ? `${count} ${count === 1 ? "school" : "schools"} listed so far, with more being added every week.`
-            : "We're checking our first schools now. Listings open soon."}
-        </p>
       </section>
 
-      <section className="border-y border-line bg-white">
-        <div className="mx-auto grid max-w-5xl gap-10 px-4 py-14 sm:grid-cols-3">
-          {[
-            {
-              title: "Search",
-              body: "Filter by city, fees, boarding and whether the school takes girls, boys or both.",
-            },
-            {
-              title: "Compare",
-              body: "Put up to three schools side by side: fees, curriculum, boarding and more on one screen.",
-            },
-            {
-              title: "Enquire",
-              body: "Send one message from SchoolSpot and get a reply about places, fees and open days.",
-            },
-          ].map((step, index) => (
-            <div key={step.title}>
-              <p className="font-display text-5xl font-bold text-leaf/25" aria-hidden="true">{index + 1}</p>
-              <h2 className="mt-2 font-display text-2xl font-semibold text-ink">{step.title}</h2>
-              <p className="mt-2 leading-relaxed text-ink/80">{step.body}</p>
-            </div>
-          ))}
+      <section aria-labelledby="how" className="border-y border-line bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+          <h2 id="how" className="font-display text-[1.75rem] leading-tight text-ink">
+            How SchoolSpot works
+          </h2>
+          <ol className="mt-10 grid gap-10 md:grid-cols-3 md:gap-0 md:divide-x md:divide-line">
+            {STEPS.map((step) => (
+              <li key={step.title} className="md:px-8 md:first:pl-0 md:last:pr-0">
+                <h3 className="font-display text-2xl text-leaf">{step.title}</h3>
+                <p className="mt-3 leading-relaxed text-ink/75">{step.body}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-14">
-        <div className="max-w-2xl">
-          <h2 className="font-display text-2xl font-semibold text-ink">Where our information comes from</h2>
-          <p className="mt-3 leading-relaxed text-ink/80">
-            We gather school details from the schools themselves and from public sources, and we show you where each fee
-            figure came from. Schools marked as checked have confirmed their own details. Fees change from term to term,
-            so always confirm with the school before you apply.
-          </p>
-          <Link href="/schools" className="mt-6 inline-block font-semibold text-leaf underline hover:text-leaf-dark">
-            Browse all schools
-          </Link>
+      <section aria-labelledby="for-schools" className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
+          <div>
+            <h2 id="for-schools" className="font-display text-[2.25rem] leading-[1.1] tracking-tight text-ink sm:text-[2.75rem]">
+              Your school, presented properly.
+            </h2>
+            <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink/75">
+              Listing is free. We build your profile from the details you send us, and you approve every word before it
+              goes live.
+            </p>
+            <a
+              href="mailto:schoolspotzw@gmail.com?subject=List%20our%20school%20on%20SchoolSpot"
+              className="mt-8 inline-block rounded-full border border-leaf px-6 py-3 font-semibold text-leaf hover:bg-leaf hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
+            >
+              List your school free
+            </a>
+          </div>
+          <div className="rounded-2xl border border-line bg-white p-7 sm:p-9">
+            <h3 className="font-semibold text-ink">Every profile includes</h3>
+            <ul className="mt-5 space-y-4">
+              {PROFILE_INCLUDES.map((item) => (
+                <li key={item} className="flex gap-3 leading-relaxed text-ink/80">
+                  <span aria-hidden="true" className="mt-[0.75rem] h-px w-4 shrink-0 bg-brass" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-7 border-t border-line pt-5 text-sm leading-relaxed text-granite">
+              Fees change from term to term, so every profile shows where its figures came from. Schools marked as
+              confirmed have checked their own details.
+            </p>
+          </div>
         </div>
       </section>
     </>

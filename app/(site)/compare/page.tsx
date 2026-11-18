@@ -58,14 +58,14 @@ export default function ComparePage() {
   }, [ids]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-24 pt-10">
-      <h1 className="font-display text-4xl font-bold tracking-tight text-ink">Compare schools</h1>
+    <div className="mx-auto max-w-6xl px-5 pb-24 pt-14 sm:px-8 sm:pt-16">
+      <h1 className="font-display text-[2.6rem] leading-tight tracking-tight text-ink sm:text-[3.25rem]">Compare schools</h1>
 
       {loading ? (
-        <p className="mt-6 text-granite">Loading your schools…</p>
+        <p className="mt-8 text-granite">Loading your schools…</p>
       ) : schools.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-line bg-white p-8">
-          <h2 className="font-display text-xl font-semibold text-ink">Pick schools to compare</h2>
+        <div className="mt-8 rounded-2xl border border-line bg-white p-8 sm:p-10">
+          <h2 className="font-display text-[1.75rem] leading-tight text-ink">Pick schools to compare</h2>
           <p className="mt-2 text-ink/80">
             Tap &quot;Add to compare&quot; on up to three schools and they&apos;ll appear here side by side.
           </p>
@@ -91,7 +91,7 @@ export default function ComparePage() {
                   <th key={school.id} scope="col" className="p-4 align-bottom">
                     <Link
                       href={schoolHref(school)}
-                      className="font-display text-lg font-semibold text-ink hover:text-leaf hover:underline"
+                      className="font-display text-[1.4rem] leading-tight text-ink decoration-brass underline-offset-4 hover:underline"
                     >
                       {school.name}
                     </Link>
@@ -116,7 +116,7 @@ export default function ComparePage() {
                       <td
                         key={school.id}
                         className={`p-4 align-top ${
-                          row.label === "Fees" ? "font-display text-lg font-semibold text-ink" : "text-ink"
+                          row.label === "Fees" ? "font-medium text-ink" : "text-ink"
                         } ${value ? "" : "italic text-granite/70"}`}
                       >
                         {value ?? "Not listed yet"}

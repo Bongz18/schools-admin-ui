@@ -13,7 +13,7 @@ export default function CompareBar() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3 sm:px-8">
         <p className="text-sm text-ink">
           {ids.length} of {COMPARE_LIMIT} schools picked
           <button type="button" onClick={clear} className="ml-3 text-granite underline hover:text-ink">
@@ -22,7 +22,7 @@ export default function CompareBar() {
         </p>
         <Link
           href="/compare"
-          className="rounded-full bg-msasa px-5 py-2 text-sm font-semibold text-white hover:bg-[#721c29] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-msasa"
+          className="rounded-full bg-leaf px-5 py-2 text-sm font-semibold text-white hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
         >
           Compare {ids.length > 1 ? "them" : "now"}
         </Link>

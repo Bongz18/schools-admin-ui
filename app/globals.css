@@ -163,22 +163,24 @@
   }
 }
 }
-/* SchoolSpot Zimbabwe brand tokens (msasa palette) */
+/* SchoolSpot Zimbabwe brand tokens: "quiet luxury" (evergreen, porcelain, brass) */
 @theme {
-  --color-ink: #17251f;
-  --color-paper: #f6f7f3;
-  --color-leaf: #2f6b4f;
-  --color-leaf-dark: #1f4a37;
-  --color-leaf-soft: #e3eee7;
+  --color-ink: #0f2a22;
+  --color-paper: #f7f7f4;
+  --color-leaf: #1c4434;
+  --color-leaf-dark: #12301f;
+  --color-leaf-soft: #e6ece7;
+  --color-brass: #a8834a;
+  --color-brass-soft: #f3eee4;
   --color-msasa: #8c2433;
   --color-msasa-soft: #f6e4e6;
-  --color-granite: #5f655e;
-  --color-line: #dde1d9;
+  --color-granite: #646a65;
+  --color-line: #e3e5e0;
 }
 
 @theme inline {
-  --font-display: var(--font-bricolage, ui-sans-serif), system-ui, sans-serif;
-  --font-body: var(--font-atkinson, ui-sans-serif), system-ui, sans-serif;
+  --font-display: var(--font-caslon, ui-serif), Georgia, serif;
+  --font-body: var(--font-hanken, ui-sans-serif), system-ui, sans-serif;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -17,6 +17,7 @@ import {
   schoolHref,
 } from "@/lib/schools";
 import CompareToggle from "@/components/site/CompareToggle";
+import SchoolCrest from "@/components/site/SchoolCrest";
 
 export const metadata: Metadata = {
   title: "Find a school | SchoolSpot Zimbabwe",
@@ -43,14 +44,14 @@ export default async function SchoolsPage({
   const hasFilters = Object.entries(filters).some(([key, value]) => key !== "sort" && value);
 
   const field =
-    "mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-ink focus:border-leaf focus:outline-none focus:ring-2 focus:ring-leaf/30";
-  const label = "block text-sm font-semibold text-ink";
+    "mt-1.5 w-full rounded-lg border border-ink/15 bg-white px-3 py-2.5 text-ink focus:border-leaf focus:outline-none focus:ring-2 focus:ring-leaf/20";
+  const label = "block text-sm font-medium text-granite";
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-24 pt-10">
-      <h1 className="font-display text-4xl font-bold tracking-tight text-ink">Find a school</h1>
+    <div className="mx-auto max-w-6xl px-5 pb-24 pt-14 sm:px-8 sm:pt-16">
+      <h1 className="font-display text-[2.6rem] leading-tight tracking-tight text-ink sm:text-[3.25rem]">Find a school</h1>
 
-      <form method="get" className="mt-6 grid gap-4 rounded-2xl border border-line bg-white p-5 sm:grid-cols-3 lg:grid-cols-4">
+      <form method="get" className="mt-8 grid gap-5 rounded-2xl border border-line bg-white p-6 sm:grid-cols-3 sm:p-7 lg:grid-cols-4">
         <div className="sm:col-span-3 lg:col-span-2">
           <label htmlFor="q" className={label}>School name or area</label>
           <input id="q" name="q" defaultValue={filters.q ?? ""} placeholder="e.g. Borrowdale" className={field} />
@@ -118,7 +119,7 @@ export default async function SchoolsPage({
         <div className="flex items-end gap-3 sm:col-span-3 lg:col-span-2">
           <button
             type="submit"
-            className="rounded-full bg-leaf px-6 py-2.5 font-semibold text-white hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
+            className="rounded-full bg-leaf px-7 py-2.5 font-semibold text-white hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
           >
             Show schools
           </button>
@@ -130,42 +131,43 @@ export default async function SchoolsPage({
         </div>
       </form>
 
-      <p className="mt-6 text-granite" aria-live="polite">
+      <p className="mt-10 text-[0.95rem] text-granite" aria-live="polite">
         {error
           ? "Schools couldn't be loaded just now. Refresh the page to try again."
           : `${schools.length} ${schools.length === 1 ? "school" : "schools"}${hasFilters ? " match your search" : ""}`}
       </p>
 
       {schools.length > 0 ? (
-        <ul className="mt-3 divide-y divide-line border-y border-line">
+        <ul className="mt-4 divide-y divide-line border-y border-line">
           {schools.map((school) => (
-            <li key={school.id} className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <Link
-                  href={schoolHref(school)}
-                  className="font-display text-xl font-semibold text-ink underline-offset-4 hover:text-leaf hover:underline"
-                >
-                  {school.name}
-                </Link>
-                <p className="mt-0.5 text-granite">{locationLine(school)}</p>
-                <ul className="mt-2 flex flex-wrap gap-2 text-sm">
-                  {school.gender && (
-                    <li className="rounded-full bg-leaf-soft px-2.5 py-0.5 text-leaf-dark">
-                      {GENDER_LABELS[school.gender] ?? school.gender}
-                    </li>
-                  )}
-                  {school.boarding && (
-                    <li className="rounded-full bg-leaf-soft px-2.5 py-0.5 text-leaf-dark">
-                      {BOARDING_LABELS[school.boarding] ?? school.boarding}
-                    </li>
-                  )}
-                  {(school.curriculum ?? []).map((c) => (
-                    <li key={c} className="rounded-full bg-leaf-soft px-2.5 py-0.5 text-leaf-dark">{c}</li>
-                  ))}
-                </ul>
+            <li key={school.id} className="flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-start gap-5">
+                <SchoolCrest name={school.name} size="sm" />
+                <div className="min-w-0">
+                  <Link
+                    href={schoolHref(school)}
+                    className="font-display text-[1.6rem] leading-tight text-ink decoration-brass underline-offset-4 hover:underline"
+                  >
+                    {school.name}
+                  </Link>
+                  <p className="mt-1 text-[0.95rem] text-granite">{locationLine(school)}</p>
+                  <ul className="mt-3 flex flex-wrap gap-2 text-sm">
+                    {[
+                      school.gender ? GENDER_LABELS[school.gender] ?? school.gender : null,
+                      school.boarding ? BOARDING_LABELS[school.boarding] ?? school.boarding : null,
+                      ...(school.curriculum ?? []),
+                    ]
+                      .filter((tag): tag is string => !!tag)
+                      .map((tag) => (
+                        <li key={tag} className="rounded-full border border-line bg-white px-3 py-0.5 text-ink/75">
+                          {tag}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
               </div>
-              <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:items-end sm:gap-2">
-                <p className="font-display text-lg font-semibold text-ink">{feeSummary(school)}</p>
+              <div className="flex shrink-0 items-center gap-4 pl-16 sm:flex-col sm:items-end sm:gap-3 sm:pl-0">
+                <p className="font-medium text-ink">{feeSummary(school)}</p>
                 <CompareToggle schoolId={school.id} />
               </div>
             </li>
@@ -173,11 +175,11 @@ export default async function SchoolsPage({
         </ul>
       ) : (
         !error && (
-          <div className="mt-6 rounded-2xl border border-dashed border-line bg-white p-8">
-            <h2 className="font-display text-xl font-semibold text-ink">
+          <div className="mt-6 rounded-2xl border border-line bg-white p-8 sm:p-10">
+            <h2 className="font-display text-[1.75rem] leading-tight text-ink">
               {all.length === 0 ? "Listings open soon" : "No schools match all of those"}
             </h2>
-            <p className="mt-2 text-ink/80">
+            <p className="mt-3 max-w-lg text-ink/75">
               {all.length === 0
                 ? "We're checking our first schools with the schools themselves. Come back soon."
                 : "Try a higher fee limit, or remove one of the filters."}

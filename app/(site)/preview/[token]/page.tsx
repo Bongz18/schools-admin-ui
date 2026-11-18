@@ -51,19 +51,19 @@ export default async function SchoolPreviewLinkPage({ params }: { params: Promis
 
   return (
     <>
-      <div className="border-b border-msasa/20 bg-msasa-soft">
-        <div className="mx-auto max-w-5xl px-4 py-4 text-sm text-ink">
+      <div className="bg-leaf text-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-4 text-sm sm:px-8">
           <p className="font-semibold">
             {live
               ? `This is ${school.name}'s live profile on SchoolSpot Zimbabwe.`
-              : `Private preview: this is how ${school.name}'s profile will look to parents. It is not public yet.`}
+              : `Private preview of ${school.name}'s profile. It is not public yet.`}
           </p>
-          <p className="mt-1 text-ink/80">
+          <p className="text-white/80">
             Please check every detail. To approve it or ask for changes, reply to our email or write to{" "}
-            <a href="mailto:schoolspotzw@gmail.com" className="font-semibold underline">
+            <a href="mailto:schoolspotzw@gmail.com" className="font-semibold text-white underline underline-offset-2">
               schoolspotzw@gmail.com
             </a>
-            . Please don&apos;t share this link outside the school.
+            . Please keep this link within the school.
           </p>
         </div>
       </div>

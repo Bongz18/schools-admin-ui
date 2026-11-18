@@ -1,4 +1,5 @@
 import { type ExamResult, formatPercent, groupExamResults } from "@/lib/schools";
+import { sectionClass, sectionHeading } from "@/lib/ui";
 
 // Exam results table on a school profile: one row per exam, one column per year (newest first).
 export default function ExamResultsSection({ results }: { results: ExamResult[] }) {
@@ -7,8 +8,8 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
   const source = results.find((r) => r.source)?.source;
 
   return (
-    <section aria-labelledby="results" className="mt-12">
-      <h2 id="results" className="font-display text-2xl font-semibold text-ink">
+    <section aria-labelledby="results" className={sectionClass}>
+      <h2 id="results" className={sectionHeading}>
         Exam results
       </h2>
       <p className="mt-2 max-w-2xl text-ink/80">
@@ -16,15 +17,15 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
         underneath.
       </p>
 
-      <div className="mt-5 overflow-x-auto rounded-2xl border border-line bg-white">
-        <table className="w-full min-w-[36rem] text-left">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-white">
+        <table className="w-full min-w-[34rem] text-left text-[0.95rem]">
           <thead>
-            <tr className="border-b border-line bg-paper">
-              <th scope="col" className="px-4 py-3 font-display text-sm font-semibold text-granite">
+            <tr className="border-b border-line">
+              <th scope="col" className="px-4 py-3 text-sm font-medium text-granite">
                 Exam
               </th>
               {years.map((year) => (
-                <th key={year} scope="col" className="px-4 py-3 text-right font-display text-sm font-semibold text-granite">
+                <th key={year} scope="col" className="px-4 py-3 text-right text-sm font-medium text-granite">
                   {year}
                 </th>
               ))}

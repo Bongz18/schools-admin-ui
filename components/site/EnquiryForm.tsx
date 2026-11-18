@@ -38,8 +38,8 @@ export default function EnquiryForm({ schoolId, schoolName }: { schoolId: string
 
   if (status === "sent") {
     return (
-      <div className="rounded-2xl border border-leaf bg-leaf-soft p-6" role="status">
-        <h3 className="font-display text-xl font-semibold text-ink">Enquiry sent</h3>
+      <div className="rounded-2xl border border-leaf/30 bg-white p-6" role="status">
+        <h3 className="font-display text-2xl text-ink">Enquiry sent</h3>
         <p className="mt-2 text-ink">
           SchoolSpot will pass your question to {schoolName}. Expect a reply by email or phone.
         </p>
@@ -48,8 +48,8 @@ export default function EnquiryForm({ schoolId, schoolName }: { schoolId: string
   }
 
   const field =
-    "mt-1 w-full rounded-lg border border-line bg-white px-3 py-2.5 text-ink focus:border-leaf focus:outline-none focus:ring-2 focus:ring-leaf/30";
-  const label = "block text-sm font-semibold text-ink";
+    "mt-1.5 w-full rounded-lg border border-ink/15 bg-white px-3.5 py-2.5 text-ink placeholder:text-granite/60 focus:border-leaf focus:outline-none focus:ring-2 focus:ring-leaf/20";
+  const label = "block text-sm font-medium text-ink";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -106,7 +106,7 @@ export default function EnquiryForm({ schoolId, schoolName }: { schoolId: string
       <button
         type="submit"
         disabled={status === "sending"}
-        className="w-full rounded-full bg-msasa px-6 py-3 font-semibold text-white hover:bg-[#721c29] disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-msasa sm:w-auto"
+        className="w-full rounded-full bg-leaf px-6 py-3 font-semibold text-white hover:bg-leaf-dark disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf sm:w-auto"
       >
         {status === "sending" ? "Sending…" : "Send enquiry"}
       </button>
