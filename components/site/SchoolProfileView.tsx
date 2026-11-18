@@ -4,10 +4,21 @@ import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
 import SchoolCrest from "@/components/site/SchoolCrest";
+import SocialLinks from "@/components/site/SocialLinks";
 import VerifiedBadge from "@/components/site/VerifiedBadge";
 import { sectionClass } from "@/lib/ui";
 import SectionTitle from "@/components/site/SectionTitle";
 
+
+// A highlight written as "Heading: description" is shown as a heading with the description below.
+function splitHighlight(item: string) {
+  const at = item.indexOf(": ");
+  if (at > 0 && at <= 60) {
+    const body = item.slice(at + 2).trim();
+    return { heading: item.slice(0, at).trim(), body: body.charAt(0).toUpperCase() + body.slice(1) };
+  }
+  return { heading: null, body: item };
+}
 
 // The body of a school profile. Used by the public page, the admin preview and the school's private preview link.
 export default function SchoolProfileView({
@@ -39,7 +50,11 @@ export default function SchoolProfileView({
   const websiteLabel = school.website?.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
   const contactRows: { label: string; value: React.ReactNode }[] = [];
-  if (school.address) contactRows.push({ label: "Address", value: school.address });
+  // Full address: street, then area and city (e.g. "70 S.V. Muzenda Street, Causeway, Harare").
+  if (school.address) {
+    const fullAddress = [school.address, school.suburb, school.city].filter(Boolean).join(", ");
+    contactRows.push({ label: "Address", value: fullAddress });
+  }
   if (school.phone) contactRows.push({ label: "Phone", value: school.phone });
   if (school.email)
     contactRows.push({
@@ -115,7 +130,7 @@ export default function SchoolProfileView({
           {school.highlights && school.highlights.length > 0 && (
             <section aria-labelledby="highlights" className={`${sectionClass} rounded-2xl bg-leaf-dark p-7 sm:p-10`}>
               <SectionTitle id="highlights" title="Highlights" lede="What sets the school apart, in its own words." light rule={false} />
-              <ul className="-mx-4 mt-6 grid gap-x-6 gap-y-1 md:grid-cols-2">
+              <ul className="-mx-4 mt-6 grid gap-x-6 gap-y-2 md:grid-cols-2">
                 {school.highlights.map((item) => (
                   <li
                     key={item}
@@ -123,11 +138,23 @@ export default function SchoolProfileView({
                   >
                     <span
                       aria-hidden="true"
-                      className="mt-[0.45rem] flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-brass/20 ring-1 ring-brass/40 transition duration-300 group-hover:bg-brass/35 group-hover:ring-brass/80"
+                      className="mt-[0.4rem] flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-brass/20 ring-1 ring-brass/40 transition duration-300 group-hover:bg-brass/35 group-hover:ring-brass/80"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-brass" />
                     </span>
-                    <span>{item}</span>
+                    {(() => {
+                      const { heading, body } = splitHighlight(item);
+                      return heading ? (
+                        <span className="min-w-0">
+                          <span className="block font-display text-[1.2rem] leading-snug text-white">{heading}</span>
+                          <span className="mt-1.5 block text-[0.95rem] leading-relaxed text-white/75 group-hover:text-white/85">
+                            {body}
+                          </span>
+                        </span>
+                      ) : (
+                        <span>{body}</span>
+                      );
+                    })()}
                   </li>
                 ))}
               </ul>
@@ -167,25 +194,7 @@ export default function SchoolProfileView({
             ) : (
               <p className="mt-4 text-[0.95rem] text-granite">Use the enquiry form and we&apos;ll put you in touch.</p>
             )}
-            {(school.social_links ?? []).length > 0 && (
-              <div className="mt-6 border-t border-line pt-5">
-                <p className="text-[0.8rem] font-semibold text-leaf">Follow the school</p>
-                <ul className="mt-2.5 flex flex-wrap gap-2">
-                  {(school.social_links ?? []).map((link) => (
-                    <li key={link.url}>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex rounded-full border border-leaf/25 px-3.5 py-1.5 text-sm font-medium text-leaf hover:border-leaf hover:bg-leaf-soft"
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <SocialLinks links={school.social_links ?? []} />
           </div>
         </aside>
       </div>
