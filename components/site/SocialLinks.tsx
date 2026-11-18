@@ -34,18 +34,6 @@ function Icon({ label }: { label: string }) {
   );
 }
 
-/** "@handle" for Instagram-style links, otherwise a plain prompt. */
-function subtitle(link: SocialLink) {
-  try {
-    const url = new URL(link.url);
-    const first = url.pathname.split("/").filter(Boolean)[0];
-    if (url.hostname.includes("instagram.com") && first) return `@${first}`;
-  } catch {
-    // not a valid URL: fall through
-  }
-  return "Visit our page";
-}
-
 export default function SocialLinks({ links }: { links: SocialLink[] }) {
   if (!links.length) return null;
   return (
@@ -63,10 +51,7 @@ export default function SocialLinks({ links }: { links: SocialLink[] }) {
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-leaf-soft text-leaf">
                 <Icon label={link.label} />
               </span>
-              <span className="min-w-0 leading-tight">
-                <span className="block text-sm font-semibold text-ink">{link.label}</span>
-                <span className="block truncate text-xs text-granite">{subtitle(link)}</span>
-              </span>
+              <span className="min-w-0 truncate text-sm font-semibold text-ink">{link.label}</span>
             </a>
           </li>
         ))}
