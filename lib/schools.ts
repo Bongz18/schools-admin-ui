@@ -1,5 +1,8 @@
 // Shared types and display helpers for SchoolSpot school profiles.
 
+/** An extra email for a department, e.g. { label: "Admissions (Registrar)", email: "registrar@school.co.zw" }. */
+export type SchoolContact = { label: string; email: string };
+
 export type School = {
   id: string;
   slug: string | null;
@@ -8,6 +11,8 @@ export type School = {
   city: string | null;
   suburb: string | null;
   address: string | null;
+  contacts: SchoolContact[] | null;
+  highlights: string[] | null;
   province: string | null;
   levels: string | null;
   gender: string | null;
@@ -31,7 +36,7 @@ export type School = {
 
 // Columns safe to show the public. Kept in one place so every query asks for the same thing.
 export const SCHOOL_COLUMNS =
-  "id,slug,name,school_type,city,suburb,address,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,status,updated_at";
+  "id,slug,name,school_type,city,suburb,address,contacts,highlights,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,status,updated_at";
 
 /** One exam result for one year, as supplied by the school. */
 export type ExamResult = {

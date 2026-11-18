@@ -4,7 +4,15 @@ import { requireAdmin, writeAuditLog } from "@/lib/adminAuth";
 // Admin-only: edit a school's details, mark them verified, and publish or hide the school.
 // A school can only be published once it has been verified. Every change is audit-logged.
 
-type FieldRule = { kind: "text"; max: number } | { kind: "number" } | { kind: "choice"; options: string[] } | { kind: "list"; options: string[] };
+type FieldRule =
+  | { kind: "text"; max: number }
+  | { kind: "number" }
+  | { kind: "choice"; options: string[] }
+  | { kind: "list"; options: string[] }
+  | { kind: "lines"; max: number; each: number }
+  | { kind: "contacts"; max: number };
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EDITABLE: Record<string, FieldRule> = {
   name: { kind: "text", max: 160 },
@@ -28,10 +36,14 @@ const EDITABLE: Record<string, FieldRule> = {
   phone: { kind: "text", max: 60 },
   email: { kind: "text", max: 160 },
   description: { kind: "text", max: 1500 },
+  highlights: { kind: "lines", max: 12, each: 300 },
+  contacts: { kind: "contacts", max: 10 },
 };
 
 function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown } | { ok: false } {
-  if (value === null || value === "") return { ok: true, value: rule.kind === "list" ? [] : null };
+  if (value === null || value === "") {
+    return { ok: true, value: rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" ? [] : null };
+  }
   switch (rule.kind) {
     case "text":
       return typeof value === "string" ? { ok: true, value: value.trim().slice(0, rule.max) || null } : { ok: false };
@@ -41,6 +53,22 @@ function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown
     }
     case "choice":
       return typeof value === "string" && rule.options.includes(value) ? { ok: true, value } : { ok: false };
+    case "lines": {
+      if (!Array.isArray(value) || !value.every((v) => typeof v === "string")) return { ok: false };
+      const lines = value.map((v) => v.trim().slice(0, rule.each)).filter(Boolean);
+      return lines.length <= rule.max ? { ok: true, value: lines } : { ok: false };
+    }
+    case "contacts": {
+      if (!Array.isArray(value) || value.length > rule.max) return { ok: false };
+      const contacts: { label: string; email: string }[] = [];
+      for (const item of value) {
+        const label = typeof item?.label === "string" ? item.label.trim().slice(0, 80) : "";
+        const email = typeof item?.email === "string" ? item.email.trim().toLowerCase() : "";
+        if (!label || !EMAIL.test(email)) return { ok: false };
+        contacts.push({ label, email });
+      }
+      return { ok: true, value: contacts };
+    }
     case "list":
       return Array.isArray(value) && value.every((v) => typeof v === "string" && rule.options.includes(v))
         ? { ok: true, value: Array.from(new Set(value)) }
@@ -82,7 +110,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (!result.ok) {
         return NextResponse.json({ ok: false, error: `"${key}" has an invalid value` }, { status: 400 });
       }
-      if (JSON.stringify(result.value) !== JSON.stringify(current[key] ?? (rule.kind === "list" ? [] : null))) {
+      const empty = rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" ? [] : null;
+      if (JSON.stringify(result.value) !== JSON.stringify(current[key] ?? empty)) {
         update[key] = result.value;
         changed[key] = { from: current[key], to: result.value };
       }

@@ -32,7 +32,21 @@ function toForm(school: School): FormState {
     if (Array.isArray(value)) continue;
     form[key] = value == null ? "" : String(value);
   }
+  form.highlights = (school.highlights ?? []).join("\n");
+  form.contacts = (school.contacts ?? []).map((c) => `${c.label}: ${c.email}`).join("\n");
   return form;
+}
+
+// "Admissions (Registrar): registrar@school.co.zw" -> { label, email }. The last colon splits label from email.
+function parseContacts(text: string) {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const at = line.lastIndexOf(":");
+      return at === -1 ? { label: "", email: line } : { label: line.slice(0, at).trim(), email: line.slice(at + 1).trim() };
+    });
 }
 
 export default function EditSchoolPage() {
@@ -71,6 +85,8 @@ export default function EditSchoolPage() {
     const fields: Record<string, unknown> = { curriculum };
     for (const field of TEXT_FIELDS) fields[field.key] = form[field.key] ?? "";
     for (const key of ["school_type", "gender", "boarding", "fees_text", "fees_source"]) fields[key] = form[key] ?? "";
+    fields.highlights = (form.highlights ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
+    fields.contacts = parseContacts(form.contacts ?? "");
     for (const key of ["fee_term_min_usd", "fee_term_max_usd"]) {
       const raw = (form[key] ?? "").replace(/[^0-9.]/g, "");
       fields[key] = raw === "" ? null : Number(raw);
@@ -195,6 +211,20 @@ export default function EditSchoolPage() {
               {field.hint && <p className={hint}>{field.hint}</p>}
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="text-lg font-semibold text-slate-900">More for parents</h2>
+        <div>
+          <label htmlFor="contacts" className={label}>Other email contacts</label>
+          <textarea id="contacts" rows={4} value={form.contacts ?? ""} onChange={set("contacts")} className={input} />
+          <p className={hint}>One per line, in the form Label: email. e.g. Admissions (Registrar): registrar@school.co.zw</p>
+        </div>
+        <div>
+          <label htmlFor="highlights" className={label}>Highlights</label>
+          <textarea id="highlights" rows={5} value={form.highlights ?? ""} onChange={set("highlights")} className={input} />
+          <p className={hint}>One per line, up to 12. New subjects, sports and cultural achievements, awards. Only what the school has confirmed.</p>
         </div>
       </section>
 
