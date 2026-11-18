@@ -17,7 +17,7 @@ export async function sendEnquiryAlert(enquiry: EnquiryAlert) {
   const to = process.env.ENQUIRY_ALERT_EMAIL;
   if (!apiKey || !to) return;
 
-  const from = process.env.ALERT_FROM_EMAIL || "SchoolSpot Zimbabwe <onboarding@resend.dev>";
+  const from = process.env.ALERT_FROM_EMAIL || "SchoolSpot Zimbabwe <alerts@schoolspot.co.zw>";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.schoolspot.co.zw";
 
   const lines = [
