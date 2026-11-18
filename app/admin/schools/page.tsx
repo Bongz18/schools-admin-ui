@@ -88,6 +88,27 @@ export default function SchoolsPage() {
     );
   };
 
+  // Copies the school's private preview link, for the school to check its profile before we publish.
+  const copyPreviewLink = async (school: SchoolRow) => {
+    const { data, error } = await supabase
+      .from("school_previews")
+      .select("token")
+      .eq("school_id", school.id)
+      .maybeSingle();
+    if (error || !data?.token) {
+      toast.error("No preview link found for this school.");
+      return;
+    }
+    const base = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const link = `${base.replace(/\/$/, "")}/preview/${data.token}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success(`Preview link for ${school.name} copied. Paste it into your email.`);
+    } catch {
+      window.prompt(`Copy ${school.name}'s preview link:`, link);
+    }
+  };
+
   const filtered = schools.filter((school) => school.name.toLowerCase().includes(search.toLowerCase()));
   const publishedCount = schools.filter((s) => s.status === "published").length;
   const verifiedCount = schools.filter((s) => s.verified).length;
@@ -113,7 +134,9 @@ export default function SchoolsPage() {
 
       <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         Check a school&apos;s details with the school first, then click <strong>Mark verified</strong>. Only verified
-        schools can be published. Use <strong>Preview</strong> to see a draft exactly as parents will.
+        schools can be published. Use <strong>Preview</strong> to see a draft exactly as parents will, and{" "}
+        <strong>Copy school link</strong> to send the school a private link so it can check its profile before you
+        publish.
       </p>
 
       {loading ? (
@@ -183,6 +206,13 @@ export default function SchoolsPage() {
                         >
                           Preview
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => copyPreviewLink(school)}
+                          className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          Copy school link
+                        </button>
                         <button
                           type="button"
                           disabled={busy}
