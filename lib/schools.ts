@@ -32,6 +32,59 @@ export type School = {
 export const SCHOOL_COLUMNS =
   "id,slug,name,school_type,city,suburb,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,status,updated_at";
 
+/** One exam result for one year, as supplied by the school. */
+export type ExamResult = {
+  year: number;
+  exam: string;
+  subject: string | null;
+  pass_rate: number | null;
+  top_grade_rate: number | null;
+  top_grade_label: string | null;
+  sort_order: number;
+  source: string | null;
+};
+
+export const EXAM_RESULT_COLUMNS = "year,exam,subject,pass_rate,top_grade_rate,top_grade_label,sort_order,source";
+
+export type ExamResultRow = {
+  key: string;
+  label: string;
+  topGradeLabel: string | null;
+  byYear: Map<number, ExamResult>;
+};
+
+/** Groups results into one row per exam (or exam subject), with the years newest first. */
+export function groupExamResults(results: ExamResult[]) {
+  const years = [...new Set(results.map((r) => r.year))].sort((a, b) => b - a);
+  const rows = new Map<string, ExamResultRow & { order: number }>();
+  for (const result of results) {
+    const key = `${result.exam}|${result.subject ?? ""}`;
+    let row = rows.get(key);
+    if (!row) {
+      row = {
+        key,
+        label: result.subject ? `${result.exam} ${result.subject}` : result.exam,
+        topGradeLabel: result.top_grade_label,
+        byYear: new Map(),
+        order: result.sort_order,
+      };
+      rows.set(key, row);
+    }
+    row.topGradeLabel ??= result.top_grade_label;
+    row.byYear.set(result.year, result);
+  }
+  const sorted = [...rows.values()].sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+  return { years, rows: sorted as ExamResultRow[] };
+}
+
+/** "98.7%", "100%" (no trailing ".0"). */
+export function formatPercent(value: number | string | null) {
+  if (value == null) return null;
+  const n = Number(value);
+  if (Number.isNaN(n)) return null;
+  return `${Number(n.toFixed(1))}%`;
+}
+
 export const GENDER_LABELS: Record<string, string> = {
   girls: "Girls",
   boys: "Boys",

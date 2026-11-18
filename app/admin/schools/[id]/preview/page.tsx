@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import supabase from "@/lib/supabaseClient";
-import { SCHOOL_COLUMNS, type School } from "@/lib/schools";
+import { EXAM_RESULT_COLUMNS, SCHOOL_COLUMNS, type ExamResult, type School } from "@/lib/schools";
 import SchoolProfileView from "@/components/site/SchoolProfileView";
 
 // Shows a school (draft or live) exactly as parents will see it. Admins only:
@@ -12,12 +12,22 @@ import SchoolProfileView from "@/components/site/SchoolProfileView";
 export default function SchoolPreviewPage() {
   const params = useParams<{ id: string }>();
   const [school, setSchool] = useState<School | null>(null);
+  const [results, setResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from("schools").select(SCHOOL_COLUMNS).eq("id", params.id).maybeSingle();
+      const [{ data }, { data: resultRows }] = await Promise.all([
+        supabase.from("schools").select(SCHOOL_COLUMNS).eq("id", params.id).maybeSingle(),
+        supabase
+          .from("exam_results")
+          .select(EXAM_RESULT_COLUMNS)
+          .eq("school_id", params.id)
+          .order("sort_order")
+          .order("year", { ascending: false }),
+      ]);
       setSchool((data as unknown as School | null) ?? null);
+      setResults((resultRows as unknown as ExamResult[] | null) ?? []);
       setLoading(false);
     };
     load();
@@ -38,7 +48,7 @@ export default function SchoolPreviewPage() {
         </Link>
       </div>
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-paper font-body text-ink">
-        <SchoolProfileView school={school} />
+        <SchoolProfileView school={school} results={results} />
       </div>
     </div>
   );
