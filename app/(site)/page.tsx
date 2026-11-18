@@ -124,36 +124,36 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section aria-labelledby="for-schools" className="bg-leaf text-white">
+      <section aria-labelledby="for-schools" className="border-b border-line bg-leaf-soft/55">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
           <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-20">
             <div>
               <span aria-hidden="true" className="block h-px w-10 bg-brass" />
               <h2
                 id="for-schools"
-                className="mt-5 font-display text-[2.4rem] leading-[1.06] tracking-tight text-white sm:text-[3.25rem]"
+                className="mt-5 font-display text-[2.4rem] leading-[1.06] tracking-tight text-ink sm:text-[3.25rem]"
               >
                 Your school, presented properly.
               </h2>
             </div>
             <div>
-              <p className="max-w-md text-lg leading-relaxed text-white/75">
+              <p className="max-w-md text-lg leading-relaxed text-ink/75">
                 Listing is free. We build your profile from the details you send us, and you approve every word before it
                 goes live.
               </p>
               <a
                 href="mailto:schoolspotzw@gmail.com?subject=List%20our%20school%20on%20SchoolSpot"
-                className="mt-7 inline-flex rounded-full bg-brass px-7 py-3 font-semibold text-leaf-dark transition-colors hover:bg-[#bd9659] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
+                className="mt-7 inline-flex rounded-full bg-leaf px-7 py-3 font-semibold text-white shadow-[0_8px_20px_-10px_rgba(18,48,31,0.6)] transition-colors hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
               >
                 List your school free
               </a>
             </div>
           </div>
 
-          <div className="mt-16 border-t border-white/15 pt-12">
-            <h3 className="font-display text-[1.6rem] leading-tight text-white">Every profile includes</h3>
-            <HighlightList items={PROFILE_INCLUDES} className="mt-6 lg:grid-cols-3" />
-            <p className="mt-10 max-w-2xl text-sm leading-relaxed text-white/60">
+          <div className="mt-16 border-t border-leaf/15 pt-12">
+            <h3 className="font-display text-[1.6rem] leading-tight text-ink">Every profile includes</h3>
+            <HighlightList items={PROFILE_INCLUDES} tone="light" className="mt-6 lg:grid-cols-3" />
+            <p className="mt-10 max-w-2xl text-sm leading-relaxed text-granite">
               Fees change from term to term, so every profile shows where its figures came from.
             </p>
           </div>
