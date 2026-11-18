@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "react-hot-toast";
 import supabase from "@/lib/supabaseClient";
 import { adminFetch } from "@/lib/adminFetch";
+import { FEE_CURRENCIES, formatFeeGroups, parseFeeGroups } from "@/lib/fees";
 import { BOARDING_LABELS, CURRICULUM_OPTIONS, GENDER_LABELS, SCHOOL_COLUMNS, TYPE_LABELS, type School } from "@/lib/schools";
 
 type FormState = Record<string, string>;
@@ -33,6 +34,7 @@ function toForm(school: School): FormState {
     form[key] = value == null ? "" : String(value);
   }
   form.highlights = (school.highlights ?? []).join("\n");
+  form.fee_groups = formatFeeGroups(school.fee_groups ?? []);
   form.contacts = (school.contacts ?? []).map((c) => `${c.label}: ${c.email}`).join("\n");
   return form;
 }
@@ -84,7 +86,8 @@ export default function EditSchoolPage() {
 
     const fields: Record<string, unknown> = { curriculum };
     for (const field of TEXT_FIELDS) fields[field.key] = form[field.key] ?? "";
-    for (const key of ["school_type", "gender", "boarding", "fees_text", "fees_source"]) fields[key] = form[key] ?? "";
+    for (const key of ["school_type", "gender", "boarding", "fees_text", "fees_source", "fee_currency"]) fields[key] = form[key] ?? "";
+    fields.fee_groups = parseFeeGroups(form.fee_groups ?? "");
     fields.highlights = (form.highlights ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
     fields.contacts = parseContacts(form.contacts ?? "");
     for (const key of ["fee_term_min_usd", "fee_term_max_usd"]) {
@@ -146,7 +149,25 @@ export default function EditSchoolPage() {
           </div>
         </div>
         <div>
-          <label htmlFor="fees_text" className={label}>Fee details parents will read</label>
+          <label htmlFor="fee_currency" className={label}>Currency of the fee table</label>
+          <select id="fee_currency" value={form.fee_currency ?? ""} onChange={set("fee_currency")} className={input}>
+            <option value="">Not confirmed yet</option>
+            {Object.keys(FEE_CURRENCIES).map((code) => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="fee_groups" className={label}>Fee table</label>
+          <textarea id="fee_groups" rows={9} value={form.fee_groups ?? ""} onChange={set("fee_groups")} className={`${input} font-mono text-sm`} />
+          <p className={hint}>
+            Amounts per term. Start each block with ## Title (add | Column | Column for more than one price per row), add a
+            note with &gt;, then one row per line as Label | amount. Example: ## Boarding | Full | Weekly, then Forms 1–6 | 2400 | 2100.
+            The first block sets the &quot;From … a term&quot; headline.
+          </p>
+        </div>
+        <div>
+          <label htmlFor="fees_text" className={label}>Extra fee notes (optional)</label>
           <textarea id="fees_text" rows={3} value={form.fees_text ?? ""} onChange={set("fees_text")} className={input} />
           <p className={hint}>e.g. Day US$3,950 a term; boarding US$6,100 a term (2026 Term 3). Plus US$500 registration.</p>
         </div>

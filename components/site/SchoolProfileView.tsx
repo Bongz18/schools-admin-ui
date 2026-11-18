@@ -1,7 +1,8 @@
 import type { ExamResult, School } from "@/lib/schools";
-import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, feeSummary, locationLine } from "@/lib/schools";
+import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, locationLine } from "@/lib/schools";
 import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
+import FeesSection from "@/components/site/FeesSection";
 
 // The body of a school profile. Used by the public page and by the admin draft preview.
 export default function SchoolProfileView({
@@ -48,20 +49,7 @@ export default function SchoolProfileView({
         <CompareToggle schoolId={school.id} size="md" />
       </header>
 
-      <section aria-labelledby="fees" className="mt-10 rounded-2xl bg-leaf-dark p-6 text-white sm:p-8">
-        <h2 id="fees" className="font-display text-lg font-semibold text-white/80">
-          Fees
-        </h2>
-        <p className="mt-1 font-display text-3xl font-bold sm:text-4xl">
-          {/* "Fees: see profile" reads oddly on the profile itself */}
-          {school.fee_term_min_usd == null && school.fees_text ? "Fees per term" : feeSummary(school)}
-        </p>
-        {school.fees_text && <p className="mt-3 max-w-2xl text-white/85">{school.fees_text}</p>}
-        <p className="mt-4 text-sm text-white/70">
-          {school.fees_source ? `Source: ${school.fees_source}. ` : ""}
-          Fees change often, so confirm the current amount with the school before you apply.
-        </p>
-      </section>
+      <FeesSection school={school} />
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_minmax(0,22rem)]">
         <section aria-labelledby="facts">
