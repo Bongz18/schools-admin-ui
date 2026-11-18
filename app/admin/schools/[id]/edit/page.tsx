@@ -260,7 +260,7 @@ export default function EditSchoolPage() {
         <div>
           <label htmlFor="highlights" className={label}>Highlights</label>
           <textarea id="highlights" rows={5} value={form.highlights ?? ""} onChange={set("highlights")} className={input} />
-          <p className={hint}>One per line, up to 12. New subjects, sports and cultural achievements, awards. Only what the school has confirmed.</p>
+          <p className={hint}>One per line, up to 12. Start with a short heading and a colon, e.g. Driving lessons: lessons for students aged 16 and over. Only what the school has confirmed.</p>
         </div>
       </section>
 

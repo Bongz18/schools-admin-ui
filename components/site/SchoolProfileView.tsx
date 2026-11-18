@@ -9,6 +9,13 @@ import { sectionClass } from "@/lib/ui";
 import SectionTitle from "@/components/site/SectionTitle";
 
 
+// A highlight written as "Heading: description" is shown as a heading with the description below.
+function splitHighlight(item: string) {
+  const at = item.indexOf(": ");
+  if (at > 0 && at <= 60) return { heading: item.slice(0, at).trim(), body: item.slice(at + 2).trim() };
+  return { heading: null, body: item };
+}
+
 // The body of a school profile. Used by the public page, the admin preview and the school's private preview link.
 export default function SchoolProfileView({
   school,
@@ -115,7 +122,7 @@ export default function SchoolProfileView({
           {school.highlights && school.highlights.length > 0 && (
             <section aria-labelledby="highlights" className={`${sectionClass} rounded-2xl bg-leaf-dark p-7 sm:p-10`}>
               <SectionTitle id="highlights" title="Highlights" lede="What sets the school apart, in its own words." light rule={false} />
-              <ul className="-mx-4 mt-6 grid gap-x-6 gap-y-1 md:grid-cols-2">
+              <ul className="-mx-4 mt-6 grid gap-x-6 gap-y-2 md:grid-cols-2">
                 {school.highlights.map((item) => (
                   <li
                     key={item}
@@ -123,11 +130,23 @@ export default function SchoolProfileView({
                   >
                     <span
                       aria-hidden="true"
-                      className="mt-[0.45rem] flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-brass/20 ring-1 ring-brass/40 transition duration-300 group-hover:bg-brass/35 group-hover:ring-brass/80"
+                      className="mt-[0.4rem] flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-brass/20 ring-1 ring-brass/40 transition duration-300 group-hover:bg-brass/35 group-hover:ring-brass/80"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-brass" />
                     </span>
-                    <span>{item}</span>
+                    {(() => {
+                      const { heading, body } = splitHighlight(item);
+                      return heading ? (
+                        <span className="min-w-0">
+                          <span className="block font-display text-[1.2rem] leading-snug text-white">{heading}</span>
+                          <span className="mt-1.5 block text-[0.95rem] leading-relaxed text-white/75 group-hover:text-white/85">
+                            {body}
+                          </span>
+                        </span>
+                      ) : (
+                        <span>{body}</span>
+                      );
+                    })()}
                   </li>
                 ))}
               </ul>
