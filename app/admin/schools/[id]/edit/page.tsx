@@ -12,7 +12,8 @@ type FormState = Record<string, string>;
 
 const TEXT_FIELDS: { key: keyof School; label: string; hint?: string; long?: boolean }[] = [
   { key: "name", label: "School name" },
-  { key: "suburb", label: "Suburb or area", hint: "e.g. Borrowdale" },
+  { key: "suburb", label: "Suburb or area", hint: "Area only, e.g. Borrowdale. Shown above the school name." },
+  { key: "address", label: "Street address", hint: "e.g. 3 Borrowdale Road. Shown in the contact box." },
   { key: "city", label: "City or town" },
   { key: "province", label: "Province" },
   { key: "levels", label: "Levels", hint: "e.g. Forms 1–6, or ECD to Grade 7" },
