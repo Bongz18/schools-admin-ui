@@ -115,16 +115,18 @@ export default function SchoolProfileView({
           {school.highlights && school.highlights.length > 0 && (
             <section aria-labelledby="highlights" className={`${sectionClass} rounded-2xl bg-leaf-dark p-7 sm:p-10`}>
               <SectionTitle id="highlights" title="Highlights" lede="What sets the school apart, in its own words." light rule={false} />
-              <ul className="mt-7 grid gap-x-10 gap-y-3 md:grid-cols-2">
+              <ul className="-mx-4 mt-6 grid gap-x-6 gap-y-1 md:grid-cols-2">
                 {school.highlights.map((item) => (
                   <li
                     key={item}
-                    className="group -mx-3 flex origin-left gap-3 rounded-xl px-3 py-2 leading-relaxed text-white/90 transition duration-300 ease-out hover:scale-[1.04] hover:bg-white/[0.07] hover:text-white motion-reduce:transform-none"
+                    className="group relative flex origin-left gap-4 rounded-2xl px-4 py-3.5 leading-relaxed text-white/90 transition duration-300 ease-out before:pointer-events-none before:absolute before:left-0 before:top-0 before:h-5 before:w-5 before:rounded-tl-2xl before:border-l before:border-t before:border-brass before:opacity-0 before:transition-opacity before:duration-300 after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:h-5 after:w-5 after:rounded-br-2xl after:border-b after:border-r after:border-brass after:opacity-0 after:transition-opacity after:duration-300 hover:scale-[1.03] hover:bg-white/[0.06] hover:text-white hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.6)] hover:before:opacity-100 hover:after:opacity-100 motion-reduce:transform-none"
                   >
                     <span
                       aria-hidden="true"
-                      className="mt-[0.7rem] h-px w-5 shrink-0 bg-brass transition-all duration-300 ease-out group-hover:w-8"
-                    />
+                      className="mt-[0.45rem] flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-brass/20 ring-1 ring-brass/40 transition duration-300 group-hover:bg-brass/35 group-hover:ring-brass/80"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-brass" />
+                    </span>
                     <span>{item}</span>
                   </li>
                 ))}
