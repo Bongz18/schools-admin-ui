@@ -50,7 +50,11 @@ export default function SchoolProfileView({
   const websiteLabel = school.website?.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
   const contactRows: { label: string; value: React.ReactNode }[] = [];
-  if (school.address) contactRows.push({ label: "Address", value: school.address });
+  // Full address: street, then area and city (e.g. "70 S.V. Muzenda Street, Causeway, Harare").
+  if (school.address) {
+    const fullAddress = [school.address, school.suburb, school.city].filter(Boolean).join(", ");
+    contactRows.push({ label: "Address", value: fullAddress });
+  }
   if (school.phone) contactRows.push({ label: "Phone", value: school.phone });
   if (school.email)
     contactRows.push({
