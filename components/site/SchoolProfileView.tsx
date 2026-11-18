@@ -1,9 +1,18 @@
-import type { School } from "@/lib/schools";
+import type { ExamResult, School } from "@/lib/schools";
 import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, feeSummary, locationLine } from "@/lib/schools";
 import CompareToggle from "@/components/site/CompareToggle";
+import ExamResultsSection from "@/components/site/ExamResultsSection";
 
 // The body of a school profile. Used by the public page and by the admin draft preview.
-export default function SchoolProfileView({ school, children }: { school: School; children?: React.ReactNode }) {
+export default function SchoolProfileView({
+  school,
+  results = [],
+  children,
+}: {
+  school: School;
+  results?: ExamResult[];
+  children?: React.ReactNode;
+}) {
   const facts: { label: string; value: string | null }[] = [
     { label: "Levels", value: school.levels },
     {
@@ -95,6 +104,8 @@ export default function SchoolProfileView({ school, children }: { school: School
           </p>
         </aside>
       </div>
+
+      <ExamResultsSection results={results} />
 
       {children}
     </article>

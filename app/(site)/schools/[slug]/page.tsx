@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { publicSupabase } from "@/lib/supabaseServer";
-import { SCHOOL_COLUMNS, type School, feeSummary, locationLine } from "@/lib/schools";
+import {
+  EXAM_RESULT_COLUMNS,
+  SCHOOL_COLUMNS,
+  type ExamResult,
+  type School,
+  feeSummary,
+  locationLine,
+} from "@/lib/schools";
 import SchoolProfileView from "@/components/site/SchoolProfileView";
 import EnquiryForm from "@/components/site/EnquiryForm";
 import TrackView from "@/components/site/TrackView";
@@ -18,6 +25,16 @@ async function getSchool(slug: string) {
   return (data as unknown as School | null) ?? null;
 }
 
+async function getResults(schoolId: string) {
+  const { data } = await publicSupabase()
+    .from("exam_results")
+    .select(EXAM_RESULT_COLUMNS)
+    .eq("school_id", schoolId)
+    .order("sort_order")
+    .order("year", { ascending: false });
+  return (data as unknown as ExamResult[] | null) ?? [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const school = await getSchool(slug);
@@ -32,9 +49,10 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
   const { slug } = await params;
   const school = await getSchool(slug);
   if (!school) notFound();
+  const results = await getResults(school.id);
 
   return (
-    <SchoolProfileView school={school}>
+    <SchoolProfileView school={school} results={results}>
       <TrackView schoolId={school.id} />
       <section aria-labelledby="enquire" className="mt-14 max-w-2xl">
         <h2 id="enquire" className="font-display text-2xl font-semibold text-ink">
