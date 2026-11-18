@@ -115,10 +115,16 @@ export default function SchoolProfileView({
           {school.highlights && school.highlights.length > 0 && (
             <section aria-labelledby="highlights" className={`${sectionClass} rounded-2xl bg-leaf-dark p-7 sm:p-10`}>
               <SectionTitle id="highlights" title="Highlights" lede="What sets the school apart, in its own words." light rule={false} />
-              <ul className="mt-7 grid gap-x-10 gap-y-5 md:grid-cols-2">
+              <ul className="mt-7 grid gap-x-10 gap-y-3 md:grid-cols-2">
                 {school.highlights.map((item) => (
-                  <li key={item} className="flex gap-3 leading-relaxed text-white/90">
-                    <span aria-hidden="true" className="mt-[0.7rem] h-px w-5 shrink-0 bg-brass" />
+                  <li
+                    key={item}
+                    className="group -mx-3 flex origin-left gap-3 rounded-xl px-3 py-2 leading-relaxed text-white/90 transition duration-300 ease-out hover:scale-[1.04] hover:bg-white/[0.07] hover:text-white motion-reduce:transform-none"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="mt-[0.7rem] h-px w-5 shrink-0 bg-brass transition-all duration-300 ease-out group-hover:w-8"
+                    />
                     <span>{item}</span>
                   </li>
                 ))}
