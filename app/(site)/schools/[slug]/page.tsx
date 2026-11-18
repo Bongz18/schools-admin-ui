@@ -12,6 +12,8 @@ import {
 import SchoolProfileView from "@/components/site/SchoolProfileView";
 import EnquiryForm from "@/components/site/EnquiryForm";
 import TrackView from "@/components/site/TrackView";
+import { sectionClass } from "@/lib/ui";
+import SectionTitle from "@/components/site/SectionTitle";
 
 export const revalidate = 60;
 
@@ -54,13 +56,16 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
   return (
     <SchoolProfileView school={school} results={results}>
       <TrackView schoolId={school.id} />
-      <section aria-labelledby="enquire" className="mt-14 max-w-2xl">
-        <h2 id="enquire" className="font-display text-2xl font-semibold text-ink">
-          Ask {school.name} a question
-        </h2>
-        <p className="mt-2 text-ink/80">Ask about places, fees, boarding or open days. It takes a minute.</p>
-        <div className="mt-6">
-          <EnquiryForm schoolId={school.id} schoolName={school.name} />
+      <section id="enquire" aria-labelledby="enquire-heading" className={sectionClass}>
+        <div className="rounded-2xl bg-leaf-soft/60 p-6 sm:p-8">
+          <SectionTitle
+            id="enquire-heading"
+            title={`Ask ${school.name} a question`}
+            lede="Ask about places, fees, boarding or open days. It takes a minute."
+          />
+          <div className="mt-6">
+            <EnquiryForm schoolId={school.id} schoolName={school.name} />
+          </div>
         </div>
       </section>
     </SchoolProfileView>

@@ -33,13 +33,14 @@ export type School = {
   email: string | null;
   description: string | null;
   verified: boolean;
+  verified_at: string | null;
   status: string;
   updated_at: string | null;
 };
 
 // Columns safe to show the public. Kept in one place so every query asks for the same thing.
 export const SCHOOL_COLUMNS =
-  "id,slug,name,school_type,city,suburb,address,contacts,highlights,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_groups,fee_currency,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,status,updated_at";
+  "id,slug,name,school_type,city,suburb,address,contacts,highlights,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_groups,fee_currency,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,verified_at,status,updated_at";
 
 /** One exam result for one year, as supplied by the school. */
 export type ExamResult = {

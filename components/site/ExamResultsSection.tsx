@@ -1,4 +1,6 @@
 import { type ExamResult, formatPercent, groupExamResults } from "@/lib/schools";
+import { sectionClass } from "@/lib/ui";
+import SectionTitle from "@/components/site/SectionTitle";
 
 // Exam results table on a school profile: one row per exam, one column per year (newest first).
 export default function ExamResultsSection({ results }: { results: ExamResult[] }) {
@@ -7,24 +9,22 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
   const source = results.find((r) => r.source)?.source;
 
   return (
-    <section aria-labelledby="results" className="mt-12">
-      <h2 id="results" className="font-display text-2xl font-semibold text-ink">
-        Exam results
-      </h2>
-      <p className="mt-2 max-w-2xl text-ink/80">
-        Pass rates for each year. Where the school reports top grades, the share of pupils who reached them is shown
-        underneath.
-      </p>
+    <section aria-labelledby="results" className={sectionClass}>
+      <SectionTitle
+        id="results"
+        title="Exam results"
+        lede="Pass rates by year. Where the school reports top grades, the share of pupils who reached them is shown underneath."
+      />
 
-      <div className="mt-5 overflow-x-auto rounded-2xl border border-line bg-white">
-        <table className="w-full min-w-[36rem] text-left">
+      <div className="mt-7 overflow-x-auto rounded-2xl border border-line bg-white">
+        <table className="w-full min-w-[34rem] text-left text-[0.95rem]">
           <thead>
-            <tr className="border-b border-line bg-paper">
-              <th scope="col" className="px-4 py-3 font-display text-sm font-semibold text-granite">
+            <tr className="bg-leaf-dark text-white">
+              <th scope="col" className="px-5 py-3.5 text-[0.8rem] font-semibold text-white/75">
                 Exam
               </th>
               {years.map((year) => (
-                <th key={year} scope="col" className="px-4 py-3 text-right font-display text-sm font-semibold text-granite">
+                <th key={year} scope="col" className="px-5 py-3.5 text-right font-display text-[1.2rem] font-normal">
                   {year}
                 </th>
               ))}
@@ -33,9 +33,9 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
           <tbody className="divide-y divide-line">
             {rows.map((row) => (
               <tr key={row.key}>
-                <th scope="row" className="px-4 py-3 align-top font-normal">
-                  <span className="block font-semibold text-ink">{row.label}</span>
-                  <span className="block text-sm text-granite">
+                <th scope="row" className="px-5 py-4 align-top font-normal">
+                  <span className="block font-display text-[1.15rem] leading-tight text-ink">{row.label}</span>
+                  <span className="mt-1 block text-[0.8rem] text-granite">
                     Pass rate{row.topGradeLabel ? `, then % with ${row.topGradeLabel}` : ""}
                   </span>
                 </th>
@@ -44,7 +44,7 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
                   const pass = formatPercent(result?.pass_rate ?? null);
                   const top = formatPercent(result?.top_grade_rate ?? null);
                   return (
-                    <td key={year} className="px-4 py-3 text-right align-top tabular-nums">
+                    <td key={year} className="px-5 py-4 text-right align-top tabular-nums">
                       <span className={pass ? "block font-semibold text-ink" : "block text-granite/70"}>
                         {pass ?? "–"}
                       </span>

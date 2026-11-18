@@ -135,7 +135,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
 
   // Verify / publish
-  if (typeof body.verified === "boolean") update.verified = body.verified;
+  if (typeof body.verified === "boolean") {
+    update.verified = body.verified;
+    if (body.verified && !current.verified) update.verified_at = new Date().toISOString();
+    if (!body.verified) update.verified_at = null;
+  }
   if (body.status === "published" || body.status === "draft") update.status = body.status;
 
   const nextVerified = (update.verified ?? current.verified) as boolean;
