@@ -4,6 +4,7 @@ import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
 import SchoolCrest from "@/components/site/SchoolCrest";
+import SocialLinks from "@/components/site/SocialLinks";
 import VerifiedBadge from "@/components/site/VerifiedBadge";
 import { sectionClass } from "@/lib/ui";
 import SectionTitle from "@/components/site/SectionTitle";
@@ -189,25 +190,7 @@ export default function SchoolProfileView({
             ) : (
               <p className="mt-4 text-[0.95rem] text-granite">Use the enquiry form and we&apos;ll put you in touch.</p>
             )}
-            {(school.social_links ?? []).length > 0 && (
-              <div className="mt-6 border-t border-line pt-5">
-                <p className="text-[0.8rem] font-semibold text-leaf">Follow the school</p>
-                <ul className="mt-2.5 flex flex-wrap gap-2">
-                  {(school.social_links ?? []).map((link) => (
-                    <li key={link.url}>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex rounded-full border border-leaf/25 px-3.5 py-1.5 text-sm font-medium text-leaf hover:border-leaf hover:bg-leaf-soft"
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <SocialLinks links={school.social_links ?? []} />
           </div>
         </aside>
       </div>
