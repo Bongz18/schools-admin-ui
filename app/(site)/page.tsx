@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { publicSupabase } from "@/lib/supabaseServer";
 import { FEE_OPTIONS, formatUsd } from "@/lib/schools";
+import SentenceChoice from "@/components/site/SentenceChoice";
 
 export const revalidate = 60;
 
@@ -9,49 +10,6 @@ async function getStats() {
   const rows = (data ?? []) as { city: string | null }[];
   const cities = Array.from(new Set(rows.map((row) => row.city).filter((c): c is string => !!c))).sort();
   return { count: rows.length, cities };
-}
-
-// The search reads as a sentence. Each choice is a soft pill with a small arrow; it fills
-// evergreen once the parent picks something. Empty choices are "invalid" (required, with an
-// empty first option) purely so CSS can tell picked from unpicked; the form has noValidate,
-// so leaving them empty still submits.
-function Choice({
-  id,
-  name,
-  label,
-  placeholder,
-  options,
-}: {
-  id: string;
-  name: string;
-  label: string;
-  placeholder: string;
-  options: { value: string; text: string }[];
-}) {
-  return (
-    <span className="relative mx-1 my-1 inline-flex align-baseline">
-      <label className="sr-only" htmlFor={id}>{label}</label>
-      <select
-        id={id}
-        name={name}
-        defaultValue=""
-        required
-        className="peer cursor-pointer appearance-none rounded-full border py-1 pl-5 pr-11 font-display leading-snug transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brass/60 focus-visible:ring-offset-2 invalid:border-leaf/15 invalid:bg-leaf-soft invalid:text-leaf hover:invalid:border-leaf/40 valid:border-leaf valid:bg-leaf valid:text-white"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>{option.text}</option>
-        ))}
-      </select>
-      <svg
-        viewBox="0 0 12 8"
-        aria-hidden="true"
-        className="pointer-events-none absolute right-4 top-1/2 h-2.5 w-3.5 -translate-y-1/2 text-leaf peer-valid:text-white"
-      >
-        <path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
-  );
 }
 
 const STEPS = [
@@ -81,11 +39,12 @@ export default async function HomePage() {
           Fees, boarding, results and contacts for schools across the country, checked with the schools themselves.
         </p>
 
-        <form action="/schools" method="get" noValidate className="mt-12 max-w-4xl rounded-2xl border border-line bg-white p-7 sm:p-10">
-          <p className="font-display text-[1.45rem] leading-[2.1] text-ink sm:text-[1.9rem] sm:leading-[2]">
-            I&apos;m looking for
-            <Choice
-              id="gender"
+        <form action="/schools" method="get" className="mt-12 max-w-4xl rounded-2xl border border-line bg-white p-7 sm:p-10">
+          {/* The search reads as a sentence. Words and choices are laid out as one centred line
+              with the same gap everywhere, wrapping neatly on small screens. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-4 font-display text-[1.45rem] leading-tight text-ink sm:gap-x-4 sm:text-[1.9rem]">
+            <span>I&apos;m looking for</span>
+            <SentenceChoice
               name="gender"
               label="Girls, boys or co-ed"
               placeholder="any type of"
@@ -95,8 +54,7 @@ export default async function HomePage() {
                 { value: "coed", text: "a co-ed" },
               ]}
             />
-            <Choice
-              id="boarding"
+            <SentenceChoice
               name="boarding"
               label="Day or boarding"
               placeholder="day or boarding"
@@ -105,25 +63,23 @@ export default async function HomePage() {
                 { value: "boarding", text: "boarding" },
               ]}
             />
-            school in
-            <Choice
-              id="city"
+            <span>school in</span>
+            <SentenceChoice
               name="city"
               label="City"
               placeholder="any city"
               options={cityOptions.map((city) => ({ value: city, text: city }))}
             />
-            with fees under
-            <Choice
-              id="maxfee"
+            <span>with fees under</span>
+            <SentenceChoice
               name="maxfee"
               label="Maximum fees per term"
               placeholder="any amount"
               options={FEE_OPTIONS.map((fee) => ({ value: String(fee), text: formatUsd(fee) }))}
             />
-            a term.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <span>a term.</span>
+          </div>
+          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
             <button
               type="submit"
               className="rounded-full bg-leaf px-7 py-3 font-semibold text-white hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
