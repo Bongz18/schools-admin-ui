@@ -95,11 +95,11 @@ export default function SchoolProfileView({
             )}
           </div>
 
-          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-line pt-8 lg:grid-cols-4">
+          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-7 border-t border-line pt-8 lg:grid-cols-4 lg:divide-x lg:divide-line [&>div]:lg:pl-6 [&>div:first-child]:lg:pl-0">
             {keyFacts.map((fact) => (
               <div key={fact.label}>
-                <dt className="text-sm text-granite">{fact.label}</dt>
-                <dd className={`mt-1 leading-snug ${fact.value ? "font-medium text-ink" : "text-granite/70"}`}>
+                <dt className="text-[0.8rem] font-semibold text-leaf">{fact.label}</dt>
+                <dd className={`mt-1.5 leading-snug ${fact.value ? "font-display text-[1.2rem] text-ink" : "text-granite/70"}`}>
                   {fact.value ?? "Not listed yet"}
                 </dd>
               </div>
@@ -133,7 +133,7 @@ export default function SchoolProfileView({
             <dl className="mt-6 divide-y divide-line border-y border-line">
               {about.map((fact) => (
                 <div key={fact.label} className="grid grid-cols-[9.5rem_1fr] gap-4 py-3">
-                  <dt className="text-granite">{fact.label}</dt>
+                  <dt className="text-[0.9rem] font-semibold text-leaf">{fact.label}</dt>
                   <dd className={fact.value ? "text-ink" : "text-granite/70"}>{fact.value ?? "Not listed yet"}</dd>
                 </div>
               ))}
@@ -151,7 +151,7 @@ export default function SchoolProfileView({
               <dl className="mt-5 space-y-4 text-[0.95rem]">
                 {contactRows.map((row, index) => (
                   <div key={index}>
-                    <dt className="text-sm text-granite">{row.label}</dt>
+                    <dt className="text-[0.8rem] font-semibold text-leaf">{row.label}</dt>
                     <dd className="mt-0.5 text-ink">{row.value}</dd>
                   </div>
                 ))}
