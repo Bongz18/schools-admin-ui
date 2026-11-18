@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, writeAuditLog } from "@/lib/adminAuth";
+import { cleanFeeGroups } from "@/lib/fees";
 
 // Admin-only: edit a school's details, mark them verified, and publish or hide the school.
 // A school can only be published once it has been verified. Every change is audit-logged.
@@ -10,7 +11,8 @@ type FieldRule =
   | { kind: "choice"; options: string[] }
   | { kind: "list"; options: string[] }
   | { kind: "lines"; max: number; each: number }
-  | { kind: "contacts"; max: number };
+  | { kind: "contacts"; max: number }
+  | { kind: "feegroups" };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -29,6 +31,8 @@ const EDITABLE: Record<string, FieldRule> = {
   religion: { kind: "text", max: 120 },
   founded: { kind: "text", max: 40 },
   fees_text: { kind: "text", max: 600 },
+  fee_groups: { kind: "feegroups" },
+  fee_currency: { kind: "choice", options: ["USD", "ZiG"] },
   fee_term_min_usd: { kind: "number" },
   fee_term_max_usd: { kind: "number" },
   fees_source: { kind: "text", max: 300 },
@@ -42,7 +46,7 @@ const EDITABLE: Record<string, FieldRule> = {
 
 function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown } | { ok: false } {
   if (value === null || value === "") {
-    return { ok: true, value: rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" ? [] : null };
+    return { ok: true, value: rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" ? [] : null };
   }
   switch (rule.kind) {
     case "text":
@@ -57,6 +61,10 @@ function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown
       if (!Array.isArray(value) || !value.every((v) => typeof v === "string")) return { ok: false };
       const lines = value.map((v) => v.trim().slice(0, rule.each)).filter(Boolean);
       return lines.length <= rule.max ? { ok: true, value: lines } : { ok: false };
+    }
+    case "feegroups": {
+      const groups = cleanFeeGroups(value);
+      return groups ? { ok: true, value: groups } : { ok: false };
     }
     case "contacts": {
       if (!Array.isArray(value) || value.length > rule.max) return { ok: false };
@@ -110,7 +118,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (!result.ok) {
         return NextResponse.json({ ok: false, error: `"${key}" has an invalid value` }, { status: 400 });
       }
-      const empty = rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" ? [] : null;
+      const empty = rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" ? [] : null;
       if (JSON.stringify(result.value) !== JSON.stringify(current[key] ?? empty)) {
         update[key] = result.value;
         changed[key] = { from: current[key], to: result.value };

@@ -73,3 +73,13 @@ alter table public.schools add column if not exists address text;
 alter table public.schools
   add column if not exists contacts jsonb not null default '[]'::jsonb,
   add column if not exists highlights text[] not null default '{}';
+
+-- 6. Fee tables -----------------------------------------------------------------
+-- fee_groups: [{ "title", "columns": [..], "note", "rows": [{ "label", "amounts": [..] }] }]
+-- fee_currency: 'USD' | 'ZiG' | null (not confirmed yet). See lib/fees.ts.
+alter table public.schools
+  add column if not exists fee_groups jsonb not null default '[]'::jsonb,
+  add column if not exists fee_currency text;
+do $$ begin
+  alter table public.schools add constraint schools_fee_currency_check check (fee_currency in ('USD','ZiG'));
+exception when duplicate_object then null; end $$;
