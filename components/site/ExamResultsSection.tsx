@@ -16,15 +16,15 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
         lede="Pass rates by year. Where the school reports top grades, the share of pupils who reached them is shown underneath."
       />
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-white">
+      <div className="mt-7 overflow-x-auto rounded-2xl border border-line bg-white">
         <table className="w-full min-w-[34rem] text-left text-[0.95rem]">
           <thead>
-            <tr className="border-b border-line">
-              <th scope="col" className="px-4 py-3 text-sm font-medium text-granite">
+            <tr className="bg-leaf-dark text-white">
+              <th scope="col" className="px-5 py-3.5 text-[0.8rem] font-semibold text-white/75">
                 Exam
               </th>
               {years.map((year) => (
-                <th key={year} scope="col" className="px-4 py-3 text-right text-sm font-medium text-granite">
+                <th key={year} scope="col" className="px-5 py-3.5 text-right font-display text-[1.2rem] font-normal">
                   {year}
                 </th>
               ))}
@@ -33,9 +33,9 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
           <tbody className="divide-y divide-line">
             {rows.map((row) => (
               <tr key={row.key}>
-                <th scope="row" className="px-4 py-3 align-top font-normal">
-                  <span className="block font-semibold text-ink">{row.label}</span>
-                  <span className="block text-sm text-granite">
+                <th scope="row" className="px-5 py-4 align-top font-normal">
+                  <span className="block font-display text-[1.15rem] leading-tight text-ink">{row.label}</span>
+                  <span className="mt-1 block text-[0.8rem] text-granite">
                     Pass rate{row.topGradeLabel ? `, then % with ${row.topGradeLabel}` : ""}
                   </span>
                 </th>
@@ -44,7 +44,7 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
                   const pass = formatPercent(result?.pass_rate ?? null);
                   const top = formatPercent(result?.top_grade_rate ?? null);
                   return (
-                    <td key={year} className="px-4 py-3 text-right align-top tabular-nums">
+                    <td key={year} className="px-5 py-4 text-right align-top tabular-nums">
                       <span className={pass ? "block font-semibold text-ink" : "block text-granite/70"}>
                         {pass ?? "–"}
                       </span>

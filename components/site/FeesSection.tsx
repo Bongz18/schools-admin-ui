@@ -35,35 +35,35 @@ export default function FeesSection({ school }: { school: School }) {
       {groups.length > 0 && (
         <div className={`mt-6 grid gap-4 ${groups.length > 1 ? "xl:grid-cols-2" : ""}`}>
           {groups.map((group) => {
-            const showHeader = group.columns.length > 1;
-            const width = Math.max(1, group.columns.length, ...group.rows.map((r) => r.amounts.length));
+            const columns = group.columns.length ? group.columns : ["Per term"];
+            const width = Math.max(1, columns.length, ...group.rows.map((r) => r.amounts.length));
             return (
-              <div key={group.title} className="rounded-2xl border border-line bg-white p-6">
-                <h3 className="font-semibold text-ink">{group.title}</h3>
-                {group.note && <p className="mt-1 text-sm leading-snug text-granite">{group.note}</p>}
-                <table className="mt-3 w-full text-left text-sm">
-                  {showHeader && (
-                    <thead>
-                      <tr className="border-b border-line">
-                        <th scope="col" className="pb-2 pr-3 text-xs font-medium text-granite">
-                          <span className="sr-only">Level</span>
+              <div key={group.title} className="overflow-hidden rounded-2xl border border-line bg-white">
+                <div className="px-6 pb-4 pt-6">
+                  <h3 className="font-display text-[1.4rem] leading-tight text-ink">{group.title}</h3>
+                  {group.note && <p className="mt-1.5 text-sm leading-snug text-granite">{group.note}</p>}
+                </div>
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="bg-leaf-soft/80 text-leaf">
+                      <th scope="col" className="py-2.5 pl-6 pr-3 text-[0.8rem] font-semibold">
+                        Level
+                      </th>
+                      {Array.from({ length: width }, (_, i) => (
+                        <th key={i} scope="col" className="py-2.5 pl-3 pr-3 text-right text-[0.8rem] font-semibold last:pr-6">
+                          {columns[i] ?? ""}
                         </th>
-                        {group.columns.map((column) => (
-                          <th key={column} scope="col" className="pb-2 pl-3 text-right text-xs font-medium text-granite">
-                            {column}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                  )}
+                      ))}
+                    </tr>
+                  </thead>
                   <tbody className="divide-y divide-line">
                     {group.rows.map((row) => (
                       <tr key={row.label}>
-                        <th scope="row" className="py-2 pr-3 font-normal text-ink/85">
+                        <th scope="row" className="py-3 pl-6 pr-3 font-normal text-ink/85">
                           {row.label}
                         </th>
                         {Array.from({ length: width }, (_, i) => (
-                          <td key={i} className="whitespace-nowrap py-2 pl-3 text-right font-semibold tabular-nums text-ink">
+                          <td key={i} className="whitespace-nowrap py-3 pl-3 pr-3 text-right font-semibold tabular-nums text-ink last:pr-6">
                             {formatAmount(row.amounts[i] ?? null, currency)}
                           </td>
                         ))}
@@ -71,6 +71,7 @@ export default function FeesSection({ school }: { school: School }) {
                     ))}
                   </tbody>
                 </table>
+                <div className="h-2" />
               </div>
             );
           })}
