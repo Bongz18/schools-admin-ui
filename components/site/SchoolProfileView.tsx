@@ -5,7 +5,8 @@ import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
 import SchoolCrest from "@/components/site/SchoolCrest";
 import VerifiedBadge from "@/components/site/VerifiedBadge";
-import { sectionClass, sectionHeading } from "@/lib/ui";
+import { sectionClass } from "@/lib/ui";
+import SectionTitle from "@/components/site/SectionTitle";
 
 
 // The body of a school profile. Used by the public page, the admin preview and the school's private preview link.
@@ -112,14 +113,12 @@ export default function SchoolProfileView({
           <FeesSection school={school} />
 
           {school.highlights && school.highlights.length > 0 && (
-            <section aria-labelledby="highlights" className={sectionClass}>
-              <h2 id="highlights" className={sectionHeading}>
-                Highlights
-              </h2>
-              <ul className="mt-5 max-w-2xl space-y-3">
+            <section aria-labelledby="highlights" className={`${sectionClass} rounded-2xl bg-leaf-dark p-7 sm:p-10`}>
+              <SectionTitle id="highlights" title="Highlights" lede="What sets the school apart, in its own words." light />
+              <ul className="mt-7 grid gap-x-10 gap-y-5 md:grid-cols-2">
                 {school.highlights.map((item) => (
-                  <li key={item} className="flex gap-3 leading-relaxed text-ink/85">
-                    <span aria-hidden="true" className="mt-[0.7rem] h-px w-4 shrink-0 bg-brass" />
+                  <li key={item} className="flex gap-3 leading-relaxed text-white/90">
+                    <span aria-hidden="true" className="mt-[0.7rem] h-px w-5 shrink-0 bg-brass" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -130,10 +129,8 @@ export default function SchoolProfileView({
           <ExamResultsSection results={results} />
 
           <section aria-labelledby="about" className={sectionClass}>
-            <h2 id="about" className={sectionHeading}>
-              About the school
-            </h2>
-            <dl className="mt-5 divide-y divide-line border-y border-line">
+            <SectionTitle id="about" title="About the school" />
+            <dl className="mt-6 divide-y divide-line border-y border-line">
               {about.map((fact) => (
                 <div key={fact.label} className="grid grid-cols-[9.5rem_1fr] gap-4 py-3">
                   <dt className="text-granite">{fact.label}</dt>
@@ -148,7 +145,8 @@ export default function SchoolProfileView({
 
         <aside className="lg:sticky lg:top-8 lg:self-start">
           <div className="rounded-2xl border border-line bg-white p-6">
-            <h2 className="font-display text-[1.4rem] leading-tight text-ink">Contact the school</h2>
+            <span aria-hidden="true" className="block h-px w-8 bg-brass" />
+            <h2 className="mt-3 font-display text-[1.5rem] leading-tight text-ink">Contact the school</h2>
             {contactRows.length ? (
               <dl className="mt-5 space-y-4 text-[0.95rem]">
                 {contactRows.map((row, index) => (

@@ -1,7 +1,8 @@
 import type { School } from "@/lib/schools";
 import { feeSummary } from "@/lib/schools";
 import { formatAmount, lowestBaseFee } from "@/lib/fees";
-import { sectionClass, sectionHeading } from "@/lib/ui";
+import { sectionClass } from "@/lib/ui";
+import SectionTitle from "@/components/site/SectionTitle";
 
 // Fees on a school profile. Styled like the other sections ("At a glance", "Exam results"):
 // a section heading with a small "From ... a term" tag, then one compact table per fee group
@@ -19,10 +20,8 @@ export default function FeesSection({ school }: { school: School }) {
 
   return (
     <section aria-labelledby="fees" className={sectionClass}>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h2 id="fees" className={sectionHeading}>
-          Fees per term
-        </h2>
+      <SectionTitle id="fees" title="Fees per term" lede="What the school charges each term, as supplied by the school." />
+      <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
         {summary && (
           <span className="rounded-full bg-leaf px-3.5 py-1 text-sm font-medium text-white">{summary}</span>
         )}

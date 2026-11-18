@@ -12,7 +12,8 @@ import {
 import SchoolProfileView from "@/components/site/SchoolProfileView";
 import EnquiryForm from "@/components/site/EnquiryForm";
 import TrackView from "@/components/site/TrackView";
-import { sectionClass, sectionHeading } from "@/lib/ui";
+import { sectionClass } from "@/lib/ui";
+import SectionTitle from "@/components/site/SectionTitle";
 
 export const revalidate = 60;
 
@@ -57,10 +58,11 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
       <TrackView schoolId={school.id} />
       <section id="enquire" aria-labelledby="enquire-heading" className={sectionClass}>
         <div className="rounded-2xl bg-leaf-soft/60 p-6 sm:p-8">
-          <h2 id="enquire-heading" className={sectionHeading}>
-            Ask {school.name} a question
-          </h2>
-          <p className="mt-2 max-w-xl text-ink/75">Ask about places, fees, boarding or open days. It takes a minute.</p>
+          <SectionTitle
+            id="enquire-heading"
+            title={`Ask ${school.name} a question`}
+            lede="Ask about places, fees, boarding or open days. It takes a minute."
+          />
           <div className="mt-6">
             <EnquiryForm schoolId={school.id} schoolName={school.name} />
           </div>

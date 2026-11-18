@@ -1,5 +1,6 @@
 import { type ExamResult, formatPercent, groupExamResults } from "@/lib/schools";
-import { sectionClass, sectionHeading } from "@/lib/ui";
+import { sectionClass } from "@/lib/ui";
+import SectionTitle from "@/components/site/SectionTitle";
 
 // Exam results table on a school profile: one row per exam, one column per year (newest first).
 export default function ExamResultsSection({ results }: { results: ExamResult[] }) {
@@ -9,13 +10,11 @@ export default function ExamResultsSection({ results }: { results: ExamResult[] 
 
   return (
     <section aria-labelledby="results" className={sectionClass}>
-      <h2 id="results" className={sectionHeading}>
-        Exam results
-      </h2>
-      <p className="mt-2 max-w-2xl text-ink/80">
-        Pass rates for each year. Where the school reports top grades, the share of pupils who reached them is shown
-        underneath.
-      </p>
+      <SectionTitle
+        id="results"
+        title="Exam results"
+        lede="Pass rates by year. Where the school reports top grades, the share of pupils who reached them is shown underneath."
+      />
 
       <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-white">
         <table className="w-full min-w-[34rem] text-left text-[0.95rem]">
