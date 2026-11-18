@@ -12,7 +12,8 @@ type FieldRule =
   | { kind: "list"; options: string[] }
   | { kind: "lines"; max: number; each: number }
   | { kind: "contacts"; max: number }
-  | { kind: "feegroups" };
+  | { kind: "feegroups" }
+  | { kind: "links"; max: number };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -42,11 +43,12 @@ const EDITABLE: Record<string, FieldRule> = {
   description: { kind: "text", max: 1500 },
   highlights: { kind: "lines", max: 12, each: 300 },
   contacts: { kind: "contacts", max: 10 },
+  social_links: { kind: "links", max: 6 },
 };
 
 function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown } | { ok: false } {
   if (value === null || value === "") {
-    return { ok: true, value: rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" ? [] : null };
+    return { ok: true, value: rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" || rule.kind === "links" ? [] : null };
   }
   switch (rule.kind) {
     case "text":
@@ -65,6 +67,17 @@ function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown
     case "feegroups": {
       const groups = cleanFeeGroups(value);
       return groups ? { ok: true, value: groups } : { ok: false };
+    }
+    case "links": {
+      if (!Array.isArray(value) || value.length > rule.max) return { ok: false };
+      const links: { label: string; url: string }[] = [];
+      for (const item of value) {
+        const label = typeof item?.label === "string" ? item.label.trim().slice(0, 40) : "";
+        const url = typeof item?.url === "string" ? item.url.trim() : "";
+        if (!label || !/^https:\/\/\S+$/.test(url) || url.length > 300) return { ok: false };
+        links.push({ label, url });
+      }
+      return { ok: true, value: links };
     }
     case "contacts": {
       if (!Array.isArray(value) || value.length > rule.max) return { ok: false };
@@ -118,7 +131,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (!result.ok) {
         return NextResponse.json({ ok: false, error: `"${key}" has an invalid value` }, { status: 400 });
       }
-      const empty = rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" ? [] : null;
+      const empty = rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" || rule.kind === "links" ? [] : null;
       if (JSON.stringify(result.value) !== JSON.stringify(current[key] ?? empty)) {
         update[key] = result.value;
         changed[key] = { from: current[key], to: result.value };

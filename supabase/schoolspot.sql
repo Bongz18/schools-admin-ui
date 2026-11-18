@@ -83,3 +83,9 @@ alter table public.schools
 do $$ begin
   alter table public.schools add constraint schools_fee_currency_check check (fee_currency in ('USD','ZiG'));
 exception when duplicate_object then null; end $$;
+
+-- 7. Social media links and verification date ------------------------------------
+-- social_links: [{ "label": "Instagram", "url": "https://..." }]
+alter table public.schools
+  add column if not exists social_links jsonb not null default '[]'::jsonb,
+  add column if not exists verified_at timestamptz;
