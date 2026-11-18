@@ -5,18 +5,20 @@ export default function SectionTitle({
   title,
   lede,
   light = false,
+  rule = true,
 }: {
   id: string;
   title: string;
   lede?: string;
   light?: boolean;
+  rule?: boolean;
 }) {
   return (
     <div>
-      <span aria-hidden="true" className="block h-px w-10 bg-brass" />
+      {rule && <span aria-hidden="true" className="mb-4 block h-px w-10 bg-brass" />}
       <h2
         id={id}
-        className={`mt-4 font-display text-[2rem] leading-[1.1] tracking-tight sm:text-[2.35rem] ${light ? "text-white" : "text-ink"}`}
+        className={`font-display text-[2rem] leading-[1.1] tracking-tight sm:text-[2.35rem] ${light ? "text-white" : "text-ink"}`}
       >
         {title}
       </h2>
