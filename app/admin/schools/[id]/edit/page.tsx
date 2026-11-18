@@ -36,6 +36,7 @@ function toForm(school: School): FormState {
   form.highlights = (school.highlights ?? []).join("\n");
   form.fee_groups = formatFeeGroups(school.fee_groups ?? []);
   form.contacts = (school.contacts ?? []).map((c) => `${c.label}: ${c.email}`).join("\n");
+  form.social_links = (school.social_links ?? []).map((l) => `${l.label}: ${l.url}`).join("\n");
   return form;
 }
 
@@ -90,6 +91,15 @@ export default function EditSchoolPage() {
     fields.fee_groups = parseFeeGroups(form.fee_groups ?? "");
     fields.highlights = (form.highlights ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
     fields.contacts = parseContacts(form.contacts ?? "");
+    // "Instagram: https://..." -> { label, url }. The first ": " splits label from link.
+    fields.social_links = (form.social_links ?? "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const at = line.indexOf(": ");
+        return at === -1 ? { label: "", url: line } : { label: line.slice(0, at).trim(), url: line.slice(at + 2).trim() };
+      });
     for (const key of ["fee_term_min_usd", "fee_term_max_usd"]) {
       const raw = (form[key] ?? "").replace(/[^0-9.]/g, "");
       fields[key] = raw === "" ? null : Number(raw);
@@ -241,6 +251,11 @@ export default function EditSchoolPage() {
           <label htmlFor="contacts" className={label}>Other email contacts</label>
           <textarea id="contacts" rows={4} value={form.contacts ?? ""} onChange={set("contacts")} className={input} />
           <p className={hint}>One per line, in the form Label: email. e.g. Admissions (Registrar): registrar@school.co.zw</p>
+        </div>
+        <div>
+          <label htmlFor="social_links" className={label}>Social media pages</label>
+          <textarea id="social_links" rows={3} value={form.social_links ?? ""} onChange={set("social_links")} className={input} />
+          <p className={hint}>One per line, in the form Label: link. e.g. Instagram: https://www.instagram.com/schoolname</p>
         </div>
         <div>
           <label htmlFor="highlights" className={label}>Highlights</label>
