@@ -61,3 +61,8 @@ create policy "admins read enquiries" on public.enquiries
   for select to authenticated using (public.is_admin());
 -- No insert policy: enquiries are submitted through the app's server route,
 -- which validates them and uses the service role.
+
+-- 4. Street address, kept separate from the suburb ------------------------------
+-- The suburb/area is shown above the school name; the street address in the
+-- contact box.
+alter table public.schools add column if not exists address text;

@@ -79,6 +79,7 @@ export default function SchoolProfileView({
           <div className="rounded-2xl border border-line bg-white p-5">
             <h2 className="font-display text-lg font-semibold text-ink">Contact the school</h2>
             <ul className="mt-3 space-y-2 text-ink">
+              {school.address && <li>Address: {school.address}</li>}
               {website && (
                 <li>
                   <a href={website} target="_blank" rel="noopener noreferrer" className="text-leaf underline hover:text-leaf-dark">
@@ -88,7 +89,7 @@ export default function SchoolProfileView({
               )}
               {school.phone && <li>Phone: {school.phone}</li>}
               {school.email && <li>Email: {school.email}</li>}
-              {!website && !school.phone && !school.email && (
+              {!school.address && !website && !school.phone && !school.email && (
                 <li className="text-granite">Use the enquiry form and we&apos;ll put you in touch.</li>
               )}
             </ul>

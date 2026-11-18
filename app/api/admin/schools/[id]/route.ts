@@ -11,6 +11,7 @@ const EDITABLE: Record<string, FieldRule> = {
   school_type: { kind: "choice", options: ["private", "trust", "mission", "government", "international"] },
   city: { kind: "text", max: 80 },
   suburb: { kind: "text", max: 120 },
+  address: { kind: "text", max: 200 },
   province: { kind: "text", max: 80 },
   levels: { kind: "text", max: 120 },
   gender: { kind: "choice", options: ["girls", "boys", "coed"] },
