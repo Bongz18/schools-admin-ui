@@ -12,7 +12,10 @@ import SectionTitle from "@/components/site/SectionTitle";
 // A highlight written as "Heading: description" is shown as a heading with the description below.
 function splitHighlight(item: string) {
   const at = item.indexOf(": ");
-  if (at > 0 && at <= 60) return { heading: item.slice(0, at).trim(), body: item.slice(at + 2).trim() };
+  if (at > 0 && at <= 60) {
+    const body = item.slice(at + 2).trim();
+    return { heading: item.slice(0, at).trim(), body: body.charAt(0).toUpperCase() + body.slice(1) };
+  }
   return { heading: null, body: item };
 }
 
