@@ -52,7 +52,10 @@ export default function SchoolProfileView({
         <h2 id="fees" className="font-display text-lg font-semibold text-white/80">
           Fees
         </h2>
-        <p className="mt-1 font-display text-3xl font-bold sm:text-4xl">{feeSummary(school)}</p>
+        <p className="mt-1 font-display text-3xl font-bold sm:text-4xl">
+          {/* "Fees: see profile" reads oddly on the profile itself */}
+          {school.fee_term_min_usd == null && school.fees_text ? "Fees per term" : feeSummary(school)}
+        </p>
         {school.fees_text && <p className="mt-3 max-w-2xl text-white/85">{school.fees_text}</p>}
         <p className="mt-4 text-sm text-white/70">
           {school.fees_source ? `Source: ${school.fees_source}. ` : ""}
@@ -89,6 +92,14 @@ export default function SchoolProfileView({
               )}
               {school.phone && <li>Phone: {school.phone}</li>}
               {school.email && <li>Email: {school.email}</li>}
+              {(school.contacts ?? []).map((contact) => (
+                <li key={contact.email}>
+                  {contact.label}:{" "}
+                  <a href={`mailto:${contact.email}`} className="break-all text-leaf underline hover:text-leaf-dark">
+                    {contact.email}
+                  </a>
+                </li>
+              ))}
               {!school.address && !website && !school.phone && !school.email && (
                 <li className="text-granite">Use the enquiry form and we&apos;ll put you in touch.</li>
               )}
@@ -105,6 +116,19 @@ export default function SchoolProfileView({
           </p>
         </aside>
       </div>
+
+      {school.highlights && school.highlights.length > 0 && (
+        <section aria-labelledby="highlights" className="mt-12">
+          <h2 id="highlights" className="font-display text-2xl font-semibold text-ink">
+            Highlights
+          </h2>
+          <ul className="mt-4 max-w-3xl list-disc space-y-2 pl-5 text-ink/90 marker:text-leaf">
+            {school.highlights.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <ExamResultsSection results={results} />
 

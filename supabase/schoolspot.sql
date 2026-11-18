@@ -66,3 +66,10 @@ create policy "admins read enquiries" on public.enquiries
 -- The suburb/area is shown above the school name; the street address in the
 -- contact box.
 alter table public.schools add column if not exists address text;
+
+-- 5. Extra contacts and highlights ------------------------------------------------
+-- contacts: [{ "label": "Admissions (Registrar)", "email": "registrar@..." }]
+-- highlights: short lines shown as a list on the profile (new subjects, awards...).
+alter table public.schools
+  add column if not exists contacts jsonb not null default '[]'::jsonb,
+  add column if not exists highlights text[] not null default '{}';
