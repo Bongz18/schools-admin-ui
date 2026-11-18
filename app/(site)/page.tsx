@@ -11,9 +11,48 @@ async function getStats() {
   return { count: rows.length, cities };
 }
 
-// The search reads as a sentence; each choice is an underlined word the parent can change.
-const select =
-  "mx-1 inline-block cursor-pointer appearance-none rounded-none border-0 border-b border-brass bg-transparent px-1 pb-0.5 font-display text-leaf hover:border-leaf focus:border-leaf focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf/30";
+// The search reads as a sentence. Each choice is a soft pill with a small arrow; it fills
+// evergreen once the parent picks something. Empty choices are "invalid" (required, with an
+// empty first option) purely so CSS can tell picked from unpicked; the form has noValidate,
+// so leaving them empty still submits.
+function Choice({
+  id,
+  name,
+  label,
+  placeholder,
+  options,
+}: {
+  id: string;
+  name: string;
+  label: string;
+  placeholder: string;
+  options: { value: string; text: string }[];
+}) {
+  return (
+    <span className="relative mx-1 my-1 inline-flex align-baseline">
+      <label className="sr-only" htmlFor={id}>{label}</label>
+      <select
+        id={id}
+        name={name}
+        defaultValue=""
+        required
+        className="peer cursor-pointer appearance-none rounded-full border py-1 pl-5 pr-11 font-display leading-snug transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brass/60 focus-visible:ring-offset-2 invalid:border-leaf/15 invalid:bg-leaf-soft invalid:text-leaf hover:invalid:border-leaf/40 valid:border-leaf valid:bg-leaf valid:text-white"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>{option.text}</option>
+        ))}
+      </select>
+      <svg
+        viewBox="0 0 12 8"
+        aria-hidden="true"
+        className="pointer-events-none absolute right-4 top-1/2 h-2.5 w-3.5 -translate-y-1/2 text-leaf peer-valid:text-white"
+      >
+        <path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
 
 const STEPS = [
   { title: "Search", body: "Filter by city, fees, boarding and whether the school takes girls, boys or both." },
@@ -42,38 +81,46 @@ export default async function HomePage() {
           Fees, boarding, results and contacts for schools across the country, checked with the schools themselves.
         </p>
 
-        <form action="/schools" method="get" className="mt-12 max-w-4xl rounded-2xl border border-line bg-white p-7 sm:p-10">
-          <p className="font-display text-[1.6rem] leading-[1.9] text-ink sm:text-[2rem] sm:leading-[1.8]">
-            I&apos;m looking for a
-            <label className="sr-only" htmlFor="gender">Girls, boys or co-ed</label>
-            <select id="gender" name="gender" defaultValue="" className={select}>
-              <option value="">any</option>
-              <option value="girls">girls&apos;</option>
-              <option value="boys">boys&apos;</option>
-              <option value="coed">co-ed</option>
-            </select>
-            <label className="sr-only" htmlFor="boarding">Day or boarding</label>
-            <select id="boarding" name="boarding" defaultValue="" className={select}>
-              <option value="">day or boarding</option>
-              <option value="day">day</option>
-              <option value="boarding">boarding</option>
-            </select>
+        <form action="/schools" method="get" noValidate className="mt-12 max-w-4xl rounded-2xl border border-line bg-white p-7 sm:p-10">
+          <p className="font-display text-[1.45rem] leading-[2.1] text-ink sm:text-[1.9rem] sm:leading-[2]">
+            I&apos;m looking for
+            <Choice
+              id="gender"
+              name="gender"
+              label="Girls, boys or co-ed"
+              placeholder="any type of"
+              options={[
+                { value: "girls", text: "a girls'" },
+                { value: "boys", text: "a boys'" },
+                { value: "coed", text: "a co-ed" },
+              ]}
+            />
+            <Choice
+              id="boarding"
+              name="boarding"
+              label="Day or boarding"
+              placeholder="day or boarding"
+              options={[
+                { value: "day", text: "day" },
+                { value: "boarding", text: "boarding" },
+              ]}
+            />
             school in
-            <label className="sr-only" htmlFor="city">City</label>
-            <select id="city" name="city" defaultValue="" className={select}>
-              <option value="">any city</option>
-              {cityOptions.map((city) => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-            costing under
-            <label className="sr-only" htmlFor="maxfee">Maximum fees per term</label>
-            <select id="maxfee" name="maxfee" defaultValue="" className={select}>
-              <option value="">any amount</option>
-              {FEE_OPTIONS.map((fee) => (
-                <option key={fee} value={fee}>{formatUsd(fee)}</option>
-              ))}
-            </select>
+            <Choice
+              id="city"
+              name="city"
+              label="City"
+              placeholder="any city"
+              options={cityOptions.map((city) => ({ value: city, text: city }))}
+            />
+            with fees under
+            <Choice
+              id="maxfee"
+              name="maxfee"
+              label="Maximum fees per term"
+              placeholder="any amount"
+              options={FEE_OPTIONS.map((fee) => ({ value: String(fee), text: formatUsd(fee) }))}
+            />
             a term.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
