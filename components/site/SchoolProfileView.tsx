@@ -4,21 +4,12 @@ import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
 import SchoolCrest from "@/components/site/SchoolCrest";
+import HighlightList from "@/components/site/HighlightList";
 import SocialLinks from "@/components/site/SocialLinks";
 import VerifiedBadge from "@/components/site/VerifiedBadge";
 import { sectionClass } from "@/lib/ui";
 import SectionTitle from "@/components/site/SectionTitle";
 
-
-// A highlight written as "Heading: description" is shown as a heading with the description below.
-function splitHighlight(item: string) {
-  const at = item.indexOf(": ");
-  if (at > 0 && at <= 60) {
-    const body = item.slice(at + 2).trim();
-    return { heading: item.slice(0, at).trim(), body: body.charAt(0).toUpperCase() + body.slice(1) };
-  }
-  return { heading: null, body: item };
-}
 
 // The body of a school profile. Used by the public page, the admin preview and the school's private preview link.
 export default function SchoolProfileView({
@@ -130,34 +121,7 @@ export default function SchoolProfileView({
           {school.highlights && school.highlights.length > 0 && (
             <section aria-labelledby="highlights" className={`${sectionClass} rounded-2xl bg-leaf-dark p-7 sm:p-10`}>
               <SectionTitle id="highlights" title="Highlights" lede="What sets the school apart, in its own words." light rule={false} />
-              <ul className="-mx-4 mt-6 grid gap-x-6 gap-y-2 md:grid-cols-2">
-                {school.highlights.map((item) => (
-                  <li
-                    key={item}
-                    className="group relative flex origin-left gap-4 rounded-2xl px-4 py-3.5 leading-relaxed text-white/90 transition duration-300 ease-out before:pointer-events-none before:absolute before:left-0 before:top-0 before:h-5 before:w-5 before:rounded-tl-2xl before:border-l before:border-t before:border-brass before:opacity-0 before:transition-opacity before:duration-300 after:pointer-events-none after:absolute after:bottom-0 after:right-0 after:h-5 after:w-5 after:rounded-br-2xl after:border-b after:border-r after:border-brass after:opacity-0 after:transition-opacity after:duration-300 hover:scale-[1.03] hover:bg-white/[0.06] hover:text-white hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.6)] hover:before:opacity-100 hover:after:opacity-100 motion-reduce:transform-none"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="mt-[0.4rem] flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-brass/20 ring-1 ring-brass/40 transition duration-300 group-hover:bg-brass/35 group-hover:ring-brass/80"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-brass" />
-                    </span>
-                    {(() => {
-                      const { heading, body } = splitHighlight(item);
-                      return heading ? (
-                        <span className="min-w-0">
-                          <span className="block font-display text-[1.2rem] leading-snug text-white">{heading}</span>
-                          <span className="mt-1.5 block text-[0.95rem] leading-relaxed text-white/75 group-hover:text-white/85">
-                            {body}
-                          </span>
-                        </span>
-                      ) : (
-                        <span>{body}</span>
-                      );
-                    })()}
-                  </li>
-                ))}
-              </ul>
+              <HighlightList items={school.highlights} className="mt-6" />
             </section>
           )}
 

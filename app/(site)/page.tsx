@@ -2,6 +2,8 @@ import Link from "next/link";
 import { publicSupabase } from "@/lib/supabaseServer";
 import { FEE_OPTIONS, formatUsd } from "@/lib/schools";
 import SentenceChoice from "@/components/site/SentenceChoice";
+import HighlightList from "@/components/site/HighlightList";
+import { VerifiedSeal } from "@/components/site/VerifiedBadge";
 
 export const revalidate = 60;
 
@@ -18,11 +20,14 @@ const STEPS = [
   { title: "Enquire", body: "Send one message from SchoolSpot and hear back about places, fees and open days." },
 ];
 
+// Shown as headed points ("Heading: description") in the For schools band.
 const PROFILE_INCLUDES = [
-  "Fees for every level, with boarding set out clearly",
-  "Exam results, year by year",
-  "Highlights: new subjects, sports and cultural achievements",
-  "Direct emails for admissions and each division",
+  "Fees, clearly set out: Day fees for every level, with boarding shown separately.",
+  "Exam results: Pass rates year by year, with top grades where the school reports them.",
+  "Highlights: New subjects, sports and cultural achievements, in the school's own words.",
+  "Direct contacts: Emails for admissions and each division, plus the school's social pages.",
+  "The verified seal: A gold seal once the school has confirmed its own details.",
+  "Your approval first: Nothing goes live until the school has checked and approved its profile.",
 ];
 
 export default async function HomePage() {
@@ -93,17 +98,25 @@ export default async function HomePage() {
             </p>
           </div>
         </form>
+
+        <p className="mt-6 flex items-center gap-2.5 text-[0.95rem] text-granite">
+          <VerifiedSeal className="h-5 w-5 shrink-0" />
+          Schools with the gold seal have confirmed their own details with us.
+        </p>
       </section>
 
       <section aria-labelledby="how" className="border-y border-line bg-white">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
-          <h2 id="how" className="font-display text-[1.75rem] leading-tight text-ink">
+        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
+          <span aria-hidden="true" className="block h-px w-10 bg-brass" />
+          <h2 id="how" className="mt-4 font-display text-[2rem] leading-tight tracking-tight text-ink sm:text-[2.35rem]">
             How SchoolSpot works
           </h2>
-          <ol className="mt-10 grid gap-10 md:grid-cols-3 md:gap-0 md:divide-x md:divide-line">
-            {STEPS.map((step) => (
-              <li key={step.title} className="md:px-8 md:first:pl-0 md:last:pr-0">
-                <h3 className="font-display text-2xl text-leaf">{step.title}</h3>
+          <p className="mt-2 max-w-xl text-granite">From a first search to a reply from the school, in three steps.</p>
+          <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-0 md:divide-x md:divide-line">
+            {STEPS.map((step, index) => (
+              <li key={step.title} className="md:px-10 md:first:pl-0 md:last:pr-0">
+                <span className="font-display text-[2.6rem] leading-none text-brass">{index + 1}</span>
+                <h3 className="mt-4 font-display text-[1.6rem] leading-tight text-leaf">{step.title}</h3>
                 <p className="mt-3 leading-relaxed text-ink/75">{step.body}</p>
               </li>
             ))}
@@ -111,36 +124,37 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section aria-labelledby="for-schools" className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
-        <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
-          <div>
-            <h2 id="for-schools" className="font-display text-[2.25rem] leading-[1.1] tracking-tight text-ink sm:text-[2.75rem]">
-              Your school, presented properly.
-            </h2>
-            <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink/75">
-              Listing is free. We build your profile from the details you send us, and you approve every word before it
-              goes live.
-            </p>
-            <a
-              href="mailto:schoolspotzw@gmail.com?subject=List%20our%20school%20on%20SchoolSpot"
-              className="mt-8 inline-block rounded-full border border-leaf px-6 py-3 font-semibold text-leaf hover:bg-leaf hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
-            >
-              List your school free
-            </a>
+      <section aria-labelledby="for-schools" className="border-b border-line bg-leaf-soft/55">
+        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+          <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-20">
+            <div>
+              <span aria-hidden="true" className="block h-px w-10 bg-brass" />
+              <h2
+                id="for-schools"
+                className="mt-5 font-display text-[2.4rem] leading-[1.06] tracking-tight text-ink sm:text-[3.25rem]"
+              >
+                Your school, presented properly.
+              </h2>
+            </div>
+            <div>
+              <p className="max-w-md text-lg leading-relaxed text-ink/75">
+                Listing is free. We build your profile from the details you send us, and you approve every word before it
+                goes live.
+              </p>
+              <a
+                href="mailto:schoolspotzw@gmail.com?subject=List%20our%20school%20on%20SchoolSpot"
+                className="mt-7 inline-flex rounded-full bg-leaf px-7 py-3 font-semibold text-white shadow-[0_8px_20px_-10px_rgba(18,48,31,0.6)] transition-colors hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
+              >
+                List your school free
+              </a>
+            </div>
           </div>
-          <div className="rounded-2xl border border-line bg-white p-7 sm:p-9">
-            <h3 className="font-semibold text-ink">Every profile includes</h3>
-            <ul className="mt-5 space-y-4">
-              {PROFILE_INCLUDES.map((item) => (
-                <li key={item} className="flex gap-3 leading-relaxed text-ink/80">
-                  <span aria-hidden="true" className="mt-[0.75rem] h-px w-4 shrink-0 bg-brass" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-7 border-t border-line pt-5 text-sm leading-relaxed text-granite">
-              Fees change from term to term, so every profile shows where its figures came from. Schools marked as
-              confirmed have checked their own details.
+
+          <div className="mt-16 border-t border-leaf/15 pt-12">
+            <h3 className="font-display text-[1.6rem] leading-tight text-ink">Every profile includes</h3>
+            <HighlightList items={PROFILE_INCLUDES} tone="light" className="mt-6 lg:grid-cols-3" />
+            <p className="mt-10 max-w-2xl text-sm leading-relaxed text-granite">
+              Fees change from term to term, so every profile shows where its figures came from.
             </p>
           </div>
         </div>
