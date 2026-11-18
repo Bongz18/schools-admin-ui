@@ -4,17 +4,9 @@ import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
 import SchoolCrest from "@/components/site/SchoolCrest";
+import VerifiedBadge from "@/components/site/VerifiedBadge";
 import { sectionClass, sectionHeading } from "@/lib/ui";
 
-
-function CheckMark() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className="h-4 w-4 shrink-0 text-brass">
-      <circle cx="8" cy="8" r="7.25" fill="none" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M4.8 8.3l2.1 2.1 4.3-4.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 // The body of a school profile. Used by the public page, the admin preview and the school's private preview link.
 export default function SchoolProfileView({
@@ -74,22 +66,15 @@ export default function SchoolProfileView({
       <header className="border-b border-line bg-white">
         <div className="mx-auto max-w-6xl px-5 pb-10 pt-12 sm:px-8 sm:pt-16">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
-            <SchoolCrest name={school.name} />
+            <SchoolCrest name={school.name} verified={school.verified} />
             <div className="min-w-0">
               <p className="text-[0.95rem] text-granite">{locationLine(school)}</p>
               <h1 className="mt-1 font-display text-[2.4rem] leading-[1.08] tracking-tight text-ink sm:text-[3.4rem]">
                 {school.name}
               </h1>
-              <p className="mt-3 flex items-center gap-2 text-sm text-granite">
-                {school.verified ? (
-                  <>
-                    <CheckMark />
-                    Details confirmed by the school
-                  </>
-                ) : (
-                  "Details from public sources, not yet confirmed by the school"
-                )}
-              </p>
+              <div className="mt-4">
+                <VerifiedBadge verified={school.verified} verifiedAt={school.verified_at} />
+              </div>
             </div>
           </div>
 

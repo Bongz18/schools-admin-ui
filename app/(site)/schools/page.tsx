@@ -18,6 +18,7 @@ import {
 } from "@/lib/schools";
 import CompareToggle from "@/components/site/CompareToggle";
 import SchoolCrest from "@/components/site/SchoolCrest";
+import { VerifiedSeal } from "@/components/site/VerifiedBadge";
 
 export const metadata: Metadata = {
   title: "Find a school | SchoolSpot Zimbabwe",
@@ -142,7 +143,7 @@ export default async function SchoolsPage({
           {schools.map((school) => (
             <li key={school.id} className="flex flex-col gap-4 py-7 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start gap-5">
-                <SchoolCrest name={school.name} size="sm" />
+                <SchoolCrest name={school.name} size="sm" verified={school.verified} />
                 <div className="min-w-0">
                   <Link
                     href={schoolHref(school)}
@@ -150,7 +151,15 @@ export default async function SchoolsPage({
                   >
                     {school.name}
                   </Link>
-                  <p className="mt-1 text-[0.95rem] text-granite">{locationLine(school)}</p>
+                  <p className="mt-1 text-[0.95rem] text-granite">
+                    {locationLine(school)}
+                    {school.verified && (
+                      <span className="ml-3 inline-flex items-center gap-1.5 align-middle text-sm font-medium text-leaf">
+                        <VerifiedSeal className="h-4 w-4" />
+                        Verified
+                      </span>
+                    )}
+                  </p>
                   <ul className="mt-3 flex flex-wrap gap-2 text-sm">
                     {[
                       school.gender ? GENDER_LABELS[school.gender] ?? school.gender : null,
