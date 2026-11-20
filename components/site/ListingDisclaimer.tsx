@@ -1,4 +1,5 @@
 import type { School } from "@/lib/schools";
+import Link from "next/link";
 import { monthYear } from "@/components/site/VerifiedBadge";
 
 function officialSite(website: string | null) {
@@ -89,7 +90,10 @@ export default function ListingDisclaimer({
             <a href="mailto:schoolspotzw@gmail.com" className="text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf">
               schoolspotzw@gmail.com
             </a>{" "}
-            and we will correct it.
+            and we will correct it. See our{" "}
+            <Link href="/terms" className="text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf">Terms of Use</Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf">Privacy Policy</Link>.
           </p>
         </div>
       </div>

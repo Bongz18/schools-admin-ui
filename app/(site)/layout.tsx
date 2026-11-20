@@ -73,9 +73,13 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </div>
         </div>
         <div className="border-t border-white/10">
-          <p className="mx-auto max-w-6xl px-5 py-5 text-sm text-white/45 sm:px-8">
-            © {new Date().getFullYear()} SchoolSpot Zimbabwe
-          </p>
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-5 text-sm text-white/45 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <p>© {new Date().getFullYear()} SchoolSpot Zimbabwe. An independent school directory, not run by any school.</p>
+            <nav aria-label="Legal" className="flex gap-5">
+              <Link href="/privacy" className="text-white/70 hover:text-white">Privacy Policy</Link>
+              <Link href="/terms" className="text-white/70 hover:text-white">Terms of Use</Link>
+            </nav>
+          </div>
         </div>
       </footer>
 

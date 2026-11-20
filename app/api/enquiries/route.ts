@@ -50,6 +50,13 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+  // Parents must agree to SchoolSpot storing their details and passing them to the school.
+  if (body.consent !== true && body.consent !== "yes" && body.consent !== "on") {
+    return NextResponse.json(
+      { ok: false, error: "Tick the box to agree that we can pass your details to the school." },
+      { status: 400 },
+    );
+  }
   if (email && !EMAIL.test(email)) {
     return NextResponse.json({ ok: false, error: "That email address doesn't look right." }, { status: 400 });
   }
@@ -78,6 +85,7 @@ export async function POST(request: NextRequest) {
     child_grade: clean(body.childGrade, LIMITS.childGrade) || null,
     intake: clean(body.intake, LIMITS.intake) || null,
     message: clean(body.message, LIMITS.message) || null,
+    consent_at: new Date().toISOString(),
   };
   const { error } = await supabase.from("enquiries").insert(enquiry);
 

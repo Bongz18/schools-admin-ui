@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -16,6 +17,11 @@ export default function EnquiryForm({ schoolId, schoolName }: { schoolId: string
     if (!payload.email && !payload.phone) {
       setStatus("error");
       setError("Add an email address or a phone number so the school can reply.");
+      return;
+    }
+    if (payload.consent !== "yes") {
+      setStatus("error");
+      setError("Tick the box to agree that we can pass your details to the school.");
       return;
     }
 
@@ -41,7 +47,7 @@ export default function EnquiryForm({ schoolId, schoolName }: { schoolId: string
       <div className="rounded-2xl border border-leaf/30 bg-white p-6" role="status">
         <h3 className="font-display text-2xl text-ink">Enquiry sent</h3>
         <p className="mt-2 text-ink">
-          SchoolSpot will pass your question to {schoolName}. Expect a reply by email or phone.
+          SchoolSpot will pass your question to {schoolName}, and the school will reply to you directly by email or phone.
         </p>
       </div>
     );
@@ -97,6 +103,30 @@ export default function EnquiryForm({ schoolId, schoolName }: { schoolId: string
         />
       </div>
 
+      <p className="rounded-lg border border-line bg-white/70 px-3.5 py-3 text-sm leading-relaxed text-granite">
+        Your enquiry comes to SchoolSpot Zimbabwe first, and we pass it to {schoolName}. It is not an application for a
+        place, and we can&apos;t guarantee a reply from the school.
+      </p>
+
+      <label htmlFor="consent" className="flex items-start gap-3 text-sm leading-relaxed text-ink">
+        <input
+          id="consent"
+          name="consent"
+          type="checkbox"
+          value="yes"
+          required
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink/30 accent-leaf"
+        />
+        <span>
+          I agree that SchoolSpot Zimbabwe can store my details and pass them to {schoolName} to answer my enquiry, as
+          described in the{" "}
+          <Link href="/privacy" className="text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf">
+            Privacy Policy
+          </Link>
+          .
+        </span>
+      </label>
+
       {status === "error" && (
         <p className="rounded-lg bg-msasa-soft px-3 py-2 text-sm text-msasa" role="alert">
           {error}
@@ -111,7 +141,8 @@ export default function EnquiryForm({ schoolId, schoolName }: { schoolId: string
         {status === "sending" ? "Sending…" : "Send enquiry"}
       </button>
       <p className="text-xs text-granite">
-        We only use your details to pass your enquiry to this school.
+        We only use your details to pass your enquiry to this school, and we delete enquiries after 12 months. See our{" "}
+        <Link href="/terms" className="underline underline-offset-4">Terms of Use</Link>.
       </p>
     </form>
   );
