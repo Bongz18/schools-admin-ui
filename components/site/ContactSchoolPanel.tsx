@@ -1,6 +1,41 @@
 "use client";
 
 import { trackSchoolEvent, type SchoolEventType } from "@/lib/track";
+import {
+  PREMIUM_CARD,
+  PREMIUM_CORNER_BR,
+  PREMIUM_CORNER_TL,
+  PREMIUM_FRAME,
+  PREMIUM_ROUNDEL,
+  PREMIUM_SHEEN,
+} from "@/components/site/premiumTheme";
+
+// Small line icons for the three contact cards (gold, inside a roundel).
+function ContactIcon({ kind }: { kind: string }) {
+  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
+      {kind === "email" && (
+        <>
+          <rect x="3.5" y="5.5" width="17" height="13" rx="2" {...common} />
+          <path d="M4.5 7l7.5 6 7.5-6" {...common} />
+        </>
+      )}
+      {kind === "phone" && (
+        <path
+          d="M6.6 3.8h2.6l1.4 4-1.9 1.3a11 11 0 005.2 5.2l1.3-1.9 4 1.4v2.6a2 2 0 01-2.2 2A15.8 15.8 0 014.6 6a2 2 0 012-2.2z"
+          {...common}
+        />
+      )}
+      {kind === "web" && (
+        <>
+          <circle cx="12" cy="12" r="8.5" {...common} />
+          <path d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.3 3.5 8.5s-1.1 6.1-3.5 8.5c-2.4-2.4-3.5-5.3-3.5-8.5s1.1-6.1 3.5-8.5z" {...common} />
+        </>
+      )}
+    </svg>
+  );
+}
 
 // "Contact the school": buttons that go straight to the school (email, phone, website).
 // SchoolSpot never sees or stores what parents send; we only count clicks, anonymously,
@@ -58,26 +93,35 @@ export default function ContactSchoolPanel({
 
   return (
     <div>
-      <ul className="grid gap-3 sm:grid-cols-3">
-        {buttons.map((button, index) => (
+      <ul className="grid gap-4 sm:grid-cols-3">
+        {buttons.map((button) => (
           <li key={button.key}>
             <a
               href={button.href}
               onClick={track(button.type)}
               {...(button.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className={`group flex h-full flex-col rounded-2xl border px-5 py-4 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf ${
-                index === 0
-                  ? "border-leaf bg-leaf text-white hover:bg-leaf-dark"
-                  : "border-line bg-white text-ink hover:border-leaf/40 hover:shadow-[0_14px_30px_-20px_rgba(15,42,34,0.35)]"
-              }`}
+              className={`${PREMIUM_CARD} px-5 pb-5 pt-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass`}
             >
-              <span className="flex items-center justify-between gap-2 font-semibold">
-                {button.label}
-                <span aria-hidden="true" className="transition group-hover:translate-x-0.5">
+              <span className={PREMIUM_FRAME} aria-hidden="true" />
+              <span className={PREMIUM_SHEEN} aria-hidden="true" />
+              <span className={PREMIUM_CORNER_TL} aria-hidden="true" />
+              <span className={PREMIUM_CORNER_BR} aria-hidden="true" />
+              <span className="flex items-center gap-3">
+                <span aria-hidden="true" className={`${PREMIUM_ROUNDEL} h-9 w-9 group-hover:scale-110`}>
+                  <ContactIcon kind={button.key} />
+                </span>
+                <span className="font-display text-[1.15rem] leading-snug text-ink">{button.label}</span>
+              </span>
+              <span aria-hidden="true" className="mt-4 block h-px w-8 bg-brass/50 transition-all duration-300 group-hover:w-14" />
+              <span className="mt-3 flex items-end justify-between gap-3">
+                <span className="break-all text-sm text-granite">{button.detail}</span>
+                <span
+                  aria-hidden="true"
+                  className={`${PREMIUM_ROUNDEL} mr-2 h-8 w-8 text-sm group-hover:translate-x-0.5 group-hover:bg-brass group-hover:text-white`}
+                >
                   {button.external ? "↗" : "→"}
                 </span>
               </span>
-              <span className={`mt-1 break-all text-sm ${index === 0 ? "text-white/75" : "text-granite"}`}>{button.detail}</span>
             </a>
           </li>
         ))}
