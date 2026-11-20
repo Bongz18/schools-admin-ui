@@ -1,16 +1,28 @@
 import Link from "next/link";
 import CompareBar from "@/components/site/CompareBar";
 
-function Wordmark({ light = false }: { light?: boolean }) {
+function Wordmark({ light = false, withMark = false }: { light?: boolean; withMark?: boolean }) {
   return (
-    <span className="inline-flex items-baseline gap-2">
-      <span className={`font-display text-[1.65rem] leading-none tracking-tight ${light ? "text-white" : "text-ink"}`}>
-        SchoolSpot
+    <span className="inline-flex items-center gap-2.5">
+      {withMark && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src="/logo-mark.png" alt="" width={36} height={36} className="h-9 w-9 shrink-0" />
+      )}
+      <span className="inline-flex items-baseline gap-2">
+        <span className={`font-display text-[1.65rem] leading-none tracking-tight ${light ? "text-white" : "text-ink"}`}>
+          SchoolSpot
+        </span>
+        <span className={`text-sm font-medium ${light ? "text-white/60" : "text-brass"}`}>Zimbabwe</span>
       </span>
-      <span className={`text-sm font-medium ${light ? "text-white/60" : "text-brass"}`}>Zimbabwe</span>
     </span>
   );
 }
+
+const NAV = [
+  { href: "/schools", label: "Find a school" },
+  { href: "/compare", label: "Compare" },
+  { href: "/#for-schools", label: "For schools" },
+];
 
 // Public SchoolSpot Zimbabwe pages (the admin dashboard has its own layout).
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -24,19 +36,51 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       >
         Skip to content
       </a>
-      <header className="border-b border-line bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
+      <header className="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link href="/" aria-label="SchoolSpot Zimbabwe home" className="rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-leaf">
-            <Wordmark />
+            <Wordmark withMark />
           </Link>
-          <nav className="flex items-center gap-1 text-[0.95rem] font-medium sm:gap-2">
-            <Link href="/schools" className="rounded-full px-3 py-2 text-ink/80 hover:text-ink">
-              Find a school
-            </Link>
-            <Link href="/compare" className="rounded-full px-3 py-2 text-ink/80 hover:text-ink">
-              Compare
+
+          {/* Desktop and tablet */}
+          <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium md:flex">
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href} className="rounded-full px-3.5 py-2 text-ink/80 transition hover:bg-leaf-soft hover:text-ink">
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              href="/schools"
+              className="ml-2 rounded-full bg-leaf px-4 py-2 font-semibold text-white transition hover:bg-leaf-dark"
+            >
+              Search schools
             </Link>
           </nav>
+
+          {/* Phones: a simple menu that opens below the header (no JavaScript needed) */}
+          <details className="group relative md:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+              <span aria-hidden="true" className="flex flex-col gap-[3px]">
+                <span className="block h-[1.5px] w-4 bg-ink transition group-open:translate-y-[4.5px] group-open:rotate-45" />
+                <span className="block h-[1.5px] w-4 bg-ink transition group-open:opacity-0" />
+                <span className="block h-[1.5px] w-4 bg-ink transition group-open:-translate-y-[4.5px] group-open:-rotate-45" />
+              </span>
+              Menu
+            </summary>
+            <nav
+              aria-label="Main"
+              className="absolute right-0 top-[calc(100%+0.6rem)] w-60 overflow-hidden rounded-2xl border border-line bg-white p-2 shadow-[0_24px_50px_-24px_rgba(15,42,34,0.45)]"
+            >
+              {NAV.map((item) => (
+                <Link key={item.href} href={item.href} className="block rounded-xl px-4 py-3 text-ink hover:bg-leaf-soft">
+                  {item.label}
+                </Link>
+              ))}
+              <Link href="/schools" className="mt-1 block rounded-xl bg-leaf px-4 py-3 text-center font-semibold text-white">
+                Search schools
+              </Link>
+            </nav>
+          </details>
         </div>
       </header>
 
@@ -47,7 +91,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <footer className="bg-leaf-dark text-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
           <div className="max-w-sm">
-            <Wordmark light />
+            <Wordmark light withMark />
             <p className="mt-4 text-[0.95rem] leading-relaxed text-white/70">
               A guide to schools across Zimbabwe, made with the schools themselves. Fees and places change, so always
               confirm with the school before you apply.
