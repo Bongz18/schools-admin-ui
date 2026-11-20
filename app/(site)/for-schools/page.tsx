@@ -126,14 +126,16 @@ export default function ForSchoolsPage() {
       <section aria-labelledby="steps" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
         <Eyebrow>How listing works</Eyebrow>
         <SectionTitle id="steps">Three steps, no logins</SectionTitle>
-        <ol className="mt-10 grid gap-5 md:grid-cols-3">
+        <ol className="mt-8 grid gap-3 sm:mt-10 md:grid-cols-3 md:gap-5">
           {STEPS.map((step, index) => (
-            <li key={step.title} className="rounded-2xl border border-line bg-white p-7">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-leaf-soft font-display text-[1.35rem] text-leaf">
+            <li key={step.title} className="flex gap-4 rounded-2xl border border-line bg-white p-5 md:block md:p-7">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-leaf-soft font-display text-[1.35rem] text-leaf">
                 {index + 1}
               </span>
-              <h3 className="mt-5 font-display text-[1.45rem] leading-snug text-ink">{step.title}</h3>
-              <p className="mt-2 leading-relaxed text-granite">{step.body}</p>
+              <div>
+                <h3 className="font-display text-[1.35rem] leading-snug text-ink md:mt-5 md:text-[1.45rem]">{step.title}</h3>
+                <p className="mt-1.5 leading-relaxed text-granite md:mt-2">{step.body}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -144,9 +146,9 @@ export default function ForSchoolsPage() {
         <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
           <Eyebrow>What parents see</Eyebrow>
           <SectionTitle id="includes">Every profile includes</SectionTitle>
-          <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {INCLUDES.map((item) => (
-              <li key={item.title} className="rounded-2xl border border-line bg-paper p-6">
+              <li key={item.title} className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
                 <div className="flex items-center gap-3">
                   {item.title === "The verified seal" ? (
                     <VerifiedSeal className="h-6 w-6 shrink-0" />
@@ -160,7 +162,7 @@ export default function ForSchoolsPage() {
                   )}
                   <h3 className="font-display text-[1.25rem] leading-snug text-ink">{item.title}</h3>
                 </div>
-                <p className="mt-3 leading-relaxed text-granite">{item.body}</p>
+                <p className="mt-2 leading-relaxed text-granite sm:mt-3">{item.body}</p>
               </li>
             ))}
           </ul>
