@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { publicSupabase } from "@/lib/supabaseServer";
+import { GUIDES } from "@/lib/guides";
 
 // Lists the public pages for Google. Only PUBLISHED schools appear (the anon key
 // can't read drafts), so a school shows up here automatically once it's published.
@@ -14,6 +15,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/compare`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/how-it-works`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/for-schools`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/guides`, changeFrequency: "weekly", priority: 0.6 },
+    ...GUIDES.map((guide) => ({
+      url: `${SITE_URL}/guides/${guide.slug}`,
+      lastModified: new Date(guide.updated),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
     { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.2 },
   ];

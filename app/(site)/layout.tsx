@@ -23,6 +23,7 @@ const NAV = [
   { href: "/schools", label: "Find a school" },
   { href: "/compare", label: "Compare" },
   { href: "/how-it-works", label: "How it works" },
+  { href: "/guides", label: "Guides" },
   { href: "/for-schools", label: "For schools" },
 ];
 
@@ -105,6 +106,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               <li><Link href="/schools" className="text-white/85 hover:text-white">Find a school</Link></li>
               <li><Link href="/compare" className="text-white/85 hover:text-white">Compare schools</Link></li>
               <li><Link href="/how-it-works" className="text-white/85 hover:text-white">How it works</Link></li>
+              <li><Link href="/guides" className="text-white/85 hover:text-white">Guides for parents</Link></li>
             </ul>
           </div>
           <div>
