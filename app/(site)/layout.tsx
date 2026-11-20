@@ -19,6 +19,7 @@ function Wordmark({ light = false, withMark = false }: { light?: boolean; withMa
 }
 
 const NAV = [
+  { href: "/", label: "Home" },
   { href: "/schools", label: "Find a school" },
   { href: "/compare", label: "Compare" },
   { href: "/how-it-works", label: "How it works" },
