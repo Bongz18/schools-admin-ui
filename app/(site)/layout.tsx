@@ -3,16 +3,16 @@ import CompareBar from "@/components/site/CompareBar";
 
 function Wordmark({ light = false, withMark = false }: { light?: boolean; withMark?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2.5">
+    <span className="inline-flex items-center gap-2 min-[400px]:gap-2.5">
       {withMark && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src="/logo-mark.png" alt="" width={36} height={36} className="h-9 w-9 shrink-0" />
+        <img src="/logo-mark.png" alt="" width={36} height={36} className="h-8 w-8 shrink-0 min-[400px]:h-9 min-[400px]:w-9" />
       )}
       <span className="inline-flex items-baseline gap-2">
-        <span className={`font-display text-[1.65rem] leading-none tracking-tight ${light ? "text-white" : "text-ink"}`}>
+        <span className={`font-display text-[1.45rem] leading-none tracking-tight min-[400px]:text-[1.65rem] ${light ? "text-white" : "text-ink"}`}>
           SchoolSpot
         </span>
-        <span className={`text-sm font-medium ${light ? "text-white/60" : "text-brass"}`}>Zimbabwe</span>
+        <span className={`text-[0.8rem] font-medium min-[400px]:text-sm ${light ? "text-white/60" : "text-brass"}`}>Zimbabwe</span>
       </span>
     </span>
   );
@@ -28,7 +28,7 @@ const NAV = [
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`flex min-h-screen flex-col bg-paper font-body text-[1.0625rem] text-ink antialiased`}
+      className={`flex min-h-screen flex-col overflow-x-clip bg-paper font-body text-[1.0625rem] text-ink antialiased`}
     >
       <a
         href="#main"
@@ -37,7 +37,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         Skip to content
       </a>
       <header className="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 min-[400px]:px-5 sm:px-8">
           <Link href="/" aria-label="SchoolSpot Zimbabwe home" className="rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-leaf">
             <Wordmark withMark />
           </Link>
@@ -59,7 +59,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
           {/* Phones: a simple menu that opens below the header (no JavaScript needed) */}
           <details className="group relative md:hidden">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
+            <summary className="flex shrink-0 cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-sm min-[400px]:px-3.5 font-semibold text-ink [&::-webkit-details-marker]:hidden">
               <span aria-hidden="true" className="flex flex-col gap-[3px]">
                 <span className="block h-[1.5px] w-4 bg-ink transition group-open:translate-y-[4.5px] group-open:rotate-45" />
                 <span className="block h-[1.5px] w-4 bg-ink transition group-open:opacity-0" />
