@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { VerifiedSeal } from "@/components/site/VerifiedBadge";
 
 export const metadata: Metadata = {
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
 
 const EMAIL = "schoolspotzw@gmail.com";
 const MAILTO = `mailto:${EMAIL}?subject=List%20our%20school%20on%20SchoolSpot`;
-const EXAMPLE = "/schools/dominican-convent-high-school";
 
 const PROMISES = ["Free to list", "You approve every word", "Nothing to set up"];
 
@@ -112,9 +110,6 @@ export default function ForSchoolsPage() {
             >
               List your school free
             </a>
-            <Link href={EXAMPLE} className="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-white">
-              See a live profile →
-            </Link>
           </div>
           <p className="mt-5 text-sm text-white/60">
             Or email <span className="select-all font-semibold text-white/85">{EMAIL}</span>
