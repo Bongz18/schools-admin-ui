@@ -54,8 +54,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       url: `/schools/${slug}`,
       locale: "en_GB",
+      // Setting openGraph here replaces the site-wide one, so name the shared image again.
+      images: [{ url: "/opengraph-image.jpg", width: 1200, height: 630, alt: "SchoolSpot Zimbabwe" }],
     },
-    twitter: { card: "summary_large_image", title: `${school.name} | SchoolSpot Zimbabwe`, description },
+    twitter: {
+      card: "summary_large_image",
+      title: `${school.name} | SchoolSpot Zimbabwe`,
+      description,
+      images: ["/opengraph-image.jpg"],
+    },
   };
 }
 
