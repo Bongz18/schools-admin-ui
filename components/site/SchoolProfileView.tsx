@@ -2,6 +2,7 @@ import type { ExamResult, School } from "@/lib/schools";
 import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, activeNotice, locationLine } from "@/lib/schools";
 import AwardsSection from "@/components/site/AwardsSection";
 import NoticeBanner from "@/components/site/NoticeBanner";
+import ListingDisclaimer, { IndependentListingNote } from "@/components/site/ListingDisclaimer";
 import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
@@ -75,6 +76,7 @@ export default function SchoolProfileView({
 
   return (
     <article className="pb-24">
+      <IndependentListingNote school={school} />
       <header className="border-b border-line bg-white">
         <div className="mx-auto max-w-6xl px-5 pb-10 pt-12 sm:px-8 sm:pt-16">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
@@ -179,6 +181,8 @@ export default function SchoolProfileView({
           </div>
         </aside>
       </div>
+
+      <ListingDisclaimer school={school} />
     </article>
   );
 }

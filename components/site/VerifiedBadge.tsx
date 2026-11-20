@@ -16,7 +16,7 @@ export function VerifiedSeal({ className = "h-5 w-5", title }: { className?: str
   );
 }
 
-function monthYear(iso: string | null) {
+export function monthYear(iso: string | null) {
   if (!iso) return null;
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
