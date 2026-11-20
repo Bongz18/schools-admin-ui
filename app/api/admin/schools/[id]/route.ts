@@ -13,7 +13,9 @@ type FieldRule =
   | { kind: "lines"; max: number; each: number }
   | { kind: "contacts"; max: number }
   | { kind: "feegroups" }
-  | { kind: "links"; max: number };
+  | { kind: "links"; max: number }
+  | { kind: "notice" }
+  | { kind: "awards"; max: number };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -44,11 +46,15 @@ const EDITABLE: Record<string, FieldRule> = {
   highlights: { kind: "lines", max: 12, each: 300 },
   contacts: { kind: "contacts", max: 10 },
   social_links: { kind: "links", max: 6 },
+  notice: { kind: "notice" },
+  awards: { kind: "awards", max: 6 },
 };
+
+const str = (value: unknown, max: number) => (typeof value === "string" ? value.trim().slice(0, max) : "");
 
 function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown } | { ok: false } {
   if (value === null || value === "") {
-    return { ok: true, value: rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" || rule.kind === "links" ? [] : null };
+    return { ok: true, value: rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" || rule.kind === "links" || rule.kind === "awards" ? [] : null };
   }
   switch (rule.kind) {
     case "text":
@@ -89,6 +95,40 @@ function cleanField(rule: FieldRule, value: unknown): { ok: true; value: unknown
         contacts.push({ label, email });
       }
       return { ok: true, value: contacts };
+    }
+    case "notice": {
+      if (typeof value !== "object" || Array.isArray(value)) return { ok: false };
+      const v = value as Record<string, unknown>;
+      const title = str(v.title, 120);
+      if (!title) return { ok: true, value: null }; // no title = no notice
+      const closesOn = str(v.closes_on, 10);
+      const linkUrl = str(v.link_url, 300);
+      if (closesOn && !/^\d{4}-\d{2}-\d{2}$/.test(closesOn)) return { ok: false };
+      if (linkUrl && !/^https:\/\/\S+$/.test(linkUrl)) return { ok: false };
+      return {
+        ok: true,
+        value: {
+          label: str(v.label, 40) || null,
+          title,
+          body: str(v.body, 400) || null,
+          closes_on: closesOn || null,
+          link_url: linkUrl || null,
+          link_label: str(v.link_label, 60) || null,
+        },
+      };
+    }
+    case "awards": {
+      if (!Array.isArray(value) || value.length > rule.max) return { ok: false };
+      const awards: { count: number | null; title: string; year: string | null; note: string | null }[] = [];
+      for (const item of value) {
+        const title = str(item?.title, 120);
+        if (!title) return { ok: false };
+        const rawCount = item?.count;
+        const count = rawCount === null || rawCount === undefined || rawCount === "" ? null : Number(rawCount);
+        if (count !== null && (!Number.isInteger(count) || count < 1 || count > 9999)) return { ok: false };
+        awards.push({ count, title, year: str(item?.year, 20) || null, note: str(item?.note, 200) || null });
+      }
+      return { ok: true, value: awards };
     }
     case "list":
       return Array.isArray(value) && value.every((v) => typeof v === "string" && rule.options.includes(v))
@@ -131,7 +171,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (!result.ok) {
         return NextResponse.json({ ok: false, error: `"${key}" has an invalid value` }, { status: 400 });
       }
-      const empty = rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" || rule.kind === "links" ? [] : null;
+      const empty = rule.kind === "list" || rule.kind === "lines" || rule.kind === "contacts" || rule.kind === "feegroups" || rule.kind === "links" || rule.kind === "awards" ? [] : null;
       if (JSON.stringify(result.value) !== JSON.stringify(current[key] ?? empty)) {
         update[key] = result.value;
         changed[key] = { from: current[key], to: result.value };

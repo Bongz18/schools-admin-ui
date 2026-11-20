@@ -7,6 +7,41 @@ export type SchoolContact = { label: string; email: string };
 /** A school's social media page, e.g. { label: "Instagram", url: "https://www.instagram.com/..." }. */
 export type SocialLink = { label: string; url: string };
 
+/**
+ * A time-limited announcement shown prominently on a profile, e.g. "Lower Sixth 2027
+ * applications close 30 November". Hidden automatically after closes_on (Harare time).
+ */
+export type SchoolNotice = {
+  label: string | null;
+  title: string;
+  body: string | null;
+  closes_on: string | null; // YYYY-MM-DD
+  link_url: string | null;
+  link_label: string | null;
+};
+
+/** An award the school has confirmed, e.g. { count: 7, title: "Cambridge Learner Excellence Awards", year: "2025" }. */
+export type SchoolAward = { count: number | null; title: string; year: string | null; note?: string | null };
+
+/** Today's date in Zimbabwe as YYYY-MM-DD. */
+export function harareToday(now = new Date()) {
+  return now.toLocaleDateString("en-CA", { timeZone: "Africa/Harare" });
+}
+
+/** Whole days from today (Harare) to a YYYY-MM-DD date: 0 = today, negative = past. */
+export function daysUntil(date: string, now = new Date()) {
+  const start = Date.parse(`${harareToday(now)}T00:00:00Z`);
+  const end = Date.parse(`${date}T00:00:00Z`);
+  return Math.round((end - start) / 86_400_000);
+}
+
+/** The notice to show now, or null if there is none or its closing date has passed. */
+export function activeNotice(notice: SchoolNotice | null | undefined, now = new Date()) {
+  if (!notice || !notice.title) return null;
+  if (notice.closes_on && /^\d{4}-\d{2}-\d{2}$/.test(notice.closes_on) && daysUntil(notice.closes_on, now) < 0) return null;
+  return notice;
+}
+
 export type School = {
   id: string;
   slug: string | null;
@@ -18,6 +53,8 @@ export type School = {
   contacts: SchoolContact[] | null;
   social_links: SocialLink[] | null;
   highlights: string[] | null;
+  notice: SchoolNotice | null;
+  awards: SchoolAward[] | null;
   fee_groups: FeeGroup[] | null;
   fee_currency: string | null;
   province: string | null;
@@ -44,7 +81,7 @@ export type School = {
 
 // Columns safe to show the public. Kept in one place so every query asks for the same thing.
 export const SCHOOL_COLUMNS =
-  "id,slug,name,school_type,city,suburb,address,contacts,social_links,highlights,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_groups,fee_currency,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,verified_at,status,updated_at";
+  "id,slug,name,school_type,city,suburb,address,contacts,social_links,highlights,notice,awards,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_groups,fee_currency,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,verified_at,status,updated_at";
 
 /** One exam result for one year, as supplied by the school. */
 export type ExamResult = {

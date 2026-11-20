@@ -1,5 +1,7 @@
 import type { ExamResult, School } from "@/lib/schools";
-import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, locationLine } from "@/lib/schools";
+import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, activeNotice, locationLine } from "@/lib/schools";
+import AwardsSection from "@/components/site/AwardsSection";
+import NoticeBanner from "@/components/site/NoticeBanner";
 import CompareToggle from "@/components/site/CompareToggle";
 import ExamResultsSection from "@/components/site/ExamResultsSection";
 import FeesSection from "@/components/site/FeesSection";
@@ -36,6 +38,9 @@ export default function SchoolProfileView({
     { label: "Founded", value: school.founded },
     { label: "Location", value: locationLine(school) },
   ];
+
+  const notice = activeNotice(school.notice);
+  const awards = (school.awards ?? []).filter((award) => award && award.title);
 
   const website = school.website ? (school.website.startsWith("http") ? school.website : `https://${school.website}`) : null;
   const websiteLabel = school.website?.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -114,8 +119,20 @@ export default function SchoolProfileView({
         </div>
       </header>
 
+      {notice && (
+        <div className="mx-auto mt-10 max-w-6xl px-5 sm:px-8">
+          <NoticeBanner notice={notice} />
+        </div>
+      )}
+
       <div className="mx-auto mt-12 grid max-w-6xl gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
         <div className="min-w-0">
+          {awards.length > 0 && (
+            <div className={sectionClass}>
+              <AwardsSection awards={awards} />
+            </div>
+          )}
+
           <FeesSection school={school} />
 
           {school.highlights && school.highlights.length > 0 && (

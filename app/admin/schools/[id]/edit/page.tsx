@@ -30,13 +30,23 @@ const TEXT_FIELDS: { key: keyof School; label: string; hint?: string; long?: boo
 function toForm(school: School): FormState {
   const form: FormState = {};
   for (const [key, value] of Object.entries(school)) {
-    if (Array.isArray(value)) continue;
+    if (Array.isArray(value) || (value !== null && typeof value === "object")) continue;
     form[key] = value == null ? "" : String(value);
   }
   form.highlights = (school.highlights ?? []).join("\n");
   form.fee_groups = formatFeeGroups(school.fee_groups ?? []);
   form.contacts = (school.contacts ?? []).map((c) => `${c.label}: ${c.email}`).join("\n");
   form.social_links = (school.social_links ?? []).map((l) => `${l.label}: ${l.url}`).join("\n");
+  const notice = school.notice;
+  form.notice_label = notice?.label ?? "";
+  form.notice_title = notice?.title ?? "";
+  form.notice_body = notice?.body ?? "";
+  form.notice_closes_on = notice?.closes_on ?? "";
+  form.notice_link_url = notice?.link_url ?? "";
+  form.notice_link_label = notice?.link_label ?? "";
+  form.awards = (school.awards ?? [])
+    .map((a) => [a.count ?? "", a.title, a.year ?? "", a.note ?? ""].join(" | ").replace(/( \| )+$/, ""))
+    .join("\n");
   return form;
 }
 
@@ -99,6 +109,23 @@ export default function EditSchoolPage() {
       .map((line) => {
         const at = line.indexOf(": ");
         return at === -1 ? { label: "", url: line } : { label: line.slice(0, at).trim(), url: line.slice(at + 2).trim() };
+      });
+    fields.notice = {
+      label: form.notice_label ?? "",
+      title: form.notice_title ?? "",
+      body: form.notice_body ?? "",
+      closes_on: form.notice_closes_on ?? "",
+      link_url: form.notice_link_url ?? "",
+      link_label: form.notice_link_label ?? "",
+    };
+    // "7 | Cambridge Learner Excellence Awards | 2025 | optional note" -> { count, title, year, note }
+    fields.awards = (form.awards ?? "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [count = "", title = "", year = "", note = ""] = line.split("|").map((part) => part.trim());
+        return { count: count === "" ? null : Number(count.replace(/[^0-9]/g, "")), title, year, note };
       });
     for (const key of ["fee_term_min_usd", "fee_term_max_usd"]) {
       const raw = (form[key] ?? "").replace(/[^0-9.]/g, "");
@@ -242,6 +269,57 @@ export default function EditSchoolPage() {
               {field.hint && <p className={hint}>{field.hint}</p>}
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="text-lg font-semibold text-slate-900">Notice (temporary)</h2>
+        <p className="text-sm text-slate-600">
+          A highlighted announcement near the top of the profile, e.g. an application deadline. It disappears on its own
+          after the closing date. Leave the title empty for no notice.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="notice_title" className={label}>Title</label>
+            <input id="notice_title" value={form.notice_title ?? ""} onChange={set("notice_title")} className={input} />
+            <p className={hint}>e.g. Lower Sixth 2027</p>
+          </div>
+          <div>
+            <label htmlFor="notice_label" className={label}>Small label above the title</label>
+            <input id="notice_label" value={form.notice_label ?? ""} onChange={set("notice_label")} className={input} />
+            <p className={hint}>e.g. Now enrolling (the default), Open day</p>
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="notice_body" className={label}>Text</label>
+            <textarea id="notice_body" rows={3} value={form.notice_body ?? ""} onChange={set("notice_body")} className={input} />
+          </div>
+          <div>
+            <label htmlFor="notice_closes_on" className={label}>Closing date</label>
+            <input id="notice_closes_on" type="date" value={form.notice_closes_on ?? ""} onChange={set("notice_closes_on")} className={input} />
+            <p className={hint}>Shows a countdown. The notice hides itself the day after.</p>
+          </div>
+          <div>
+            <label htmlFor="notice_link_url" className={label}>Button link (optional)</label>
+            <input id="notice_link_url" value={form.notice_link_url ?? ""} onChange={set("notice_link_url")} className={input} />
+            <p className={hint}>Must start with https://</p>
+          </div>
+          <div>
+            <label htmlFor="notice_link_label" className={label}>Button text</label>
+            <input id="notice_link_label" value={form.notice_link_label ?? ""} onChange={set("notice_link_label")} className={input} />
+            <p className={hint}>e.g. Apply on the school website</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="text-lg font-semibold text-slate-900">Awards</h2>
+        <div>
+          <label htmlFor="awards" className={label}>Awards and recognition</label>
+          <textarea id="awards" rows={3} value={form.awards ?? ""} onChange={set("awards")} className={`${input} font-mono text-sm`} />
+          <p className={hint}>
+            One per line, up to 6: number | award | year | optional note. e.g. 7 | Cambridge Learner Excellence Awards | 2025.
+            Leave the number empty for a single award. Only awards the school has confirmed.
+          </p>
         </div>
       </section>
 
