@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { VerifiedSeal } from "@/components/site/VerifiedBadge";
+import { PREMIUM_CARD, PREMIUM_SHEEN, premiumTheme } from "@/components/site/premiumTheme";
 
 export const metadata: Metadata = {
   title: "For schools: list your school free | SchoolSpot Zimbabwe",
@@ -142,24 +143,36 @@ export default function ForSchoolsPage() {
           <Eyebrow>What parents see</Eyebrow>
           <SectionTitle id="includes">Every profile includes</SectionTitle>
           <ul className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-            {INCLUDES.map((item) => (
-              <li key={item.title} className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
-                <div className="flex items-center gap-3">
-                  {item.title === "The verified seal" ? (
-                    <VerifiedSeal className="h-6 w-6 shrink-0" />
-                  ) : (
+            {INCLUDES.map((item, i) => {
+              const theme = premiumTheme(i);
+              return (
+                <li key={item.title}>
+                  <div className={`${PREMIUM_CARD} ${theme.card} ${theme.glow} p-5 sm:p-6`}>
+                    <span className={PREMIUM_SHEEN} aria-hidden="true" />
                     <span
                       aria-hidden="true"
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brass/15 ring-1 ring-brass/40"
+                      className={`pointer-events-none absolute -bottom-7 -right-1 -z-10 font-display text-[7rem] leading-none transition-transform duration-500 group-hover:-translate-y-2 ${theme.initial}`}
                     >
-                      <span className="h-2 w-2 rounded-full bg-brass" />
+                      {String(i + 1).padStart(2, "0")}
                     </span>
-                  )}
-                  <h3 className="font-display text-[1.25rem] leading-snug text-ink">{item.title}</h3>
-                </div>
-                <p className="mt-2 leading-relaxed text-granite sm:mt-3">{item.body}</p>
-              </li>
-            ))}
+                    <div className="flex items-center gap-3">
+                      {item.title === "The verified seal" ? (
+                        <VerifiedSeal className="h-8 w-8 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                      ) : (
+                        <span
+                          aria-hidden="true"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-brass/60 transition-transform duration-300 group-hover:scale-110"
+                        >
+                          <span className="h-2.5 w-2.5 rounded-full bg-[#e2c58f]" />
+                        </span>
+                      )}
+                      <h3 className="font-display text-[1.3rem] leading-snug text-white">{item.title}</h3>
+                    </div>
+                    <p className="mt-3 leading-relaxed text-white/75">{item.body}</p>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
           <p className="mt-8 text-sm text-granite">Fees change from term to term, so every profile shows where its figures came from.</p>
         </div>

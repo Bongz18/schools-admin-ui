@@ -4,6 +4,7 @@ import { BOARDING_LABELS, FEE_OPTIONS, GENDER_LABELS, feeSummary, formatUsd, loc
 import SchoolCrest from "@/components/site/SchoolCrest";
 import SentenceChoice from "@/components/site/SentenceChoice";
 import { VerifiedSeal } from "@/components/site/VerifiedBadge";
+import { PREMIUM_CARD, PREMIUM_SHEEN, PREMIUM_THEMES, premiumTheme } from "@/components/site/premiumTheme";
 
 export const revalidate = 60;
 
@@ -37,6 +38,13 @@ async function getHomeData() {
 
 // Cities we are building listings for, in the order parents are most likely to look.
 const LAUNCH_CITIES = ["Harare", "Bulawayo", "Gweru"];
+
+// Each launch city has its own colour and region line; other cities take the next colour in turn.
+const CITY_STYLE: Record<string, { theme: number; region: string }> = {
+  Harare: { theme: 1, region: "Harare Province" },
+  Bulawayo: { theme: 2, region: "Matabeleland" },
+  Gweru: { theme: 0, region: "Midlands" },
+};
 
 const HERO_POINTS = ["Fees and exam results in one place", "Details confirmed by the schools", "Free for parents, no sign-up"];
 
@@ -186,28 +194,50 @@ export default async function HomePage() {
         <h2 id="cities" className="mt-4 font-display text-[2rem] leading-tight tracking-tight text-ink sm:text-[2.35rem]">
           Browse by city
         </h2>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-3">
-          {cities.map((city) => {
+        <ul className="mt-8 grid gap-4 sm:grid-cols-3 sm:gap-5">
+          {cities.map((city, i) => {
             const count = cityCounts.get(city) ?? 0;
+            const style = CITY_STYLE[city];
+            const theme = style ? PREMIUM_THEMES[style.theme] : premiumTheme(i);
             const inner = (
               <>
-                <span className="font-display text-[1.7rem] leading-none">{city}</span>
-                <span className={`mt-2 block text-sm ${count ? "text-white/75" : "text-granite"}`}>
-                  {count ? `${count} ${count === 1 ? "school" : "schools"} →` : "More schools are joining"}
+                <span className={PREMIUM_SHEEN} aria-hidden="true" />
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute -bottom-8 -right-2 -z-10 font-display text-[9rem] leading-none transition-transform duration-500 group-hover:-translate-y-2 ${theme.initial}`}
+                >
+                  {city.charAt(0)}
+                </span>
+                {style && (
+                  <span className="block text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#e2c58f]">
+                    {style.region}
+                  </span>
+                )}
+                <span className="mt-2 block font-display text-[1.9rem] leading-none">{city}</span>
+                <span className="mt-6 flex items-center justify-between gap-3 text-sm">
+                  <span className={count ? "font-semibold text-white" : "text-white/70"}>
+                    {count ? `${count} ${count === 1 ? "school" : "schools"}` : "More schools are joining"}
+                  </span>
+                  {count > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#e2c58f] ring-1 ring-brass/50 transition duration-300 group-hover:translate-x-1 group-hover:bg-brass group-hover:text-white"
+                    >
+                      →
+                    </span>
+                  )}
                 </span>
               </>
             );
+            const cardClass = `${PREMIUM_CARD} ${theme.card} ${theme.glow} px-6 pb-6 pt-7`;
             return (
               <li key={city}>
                 {count ? (
-                  <Link
-                    href={`/schools?city=${encodeURIComponent(city)}`}
-                    className="block rounded-2xl bg-leaf-dark px-6 py-7 text-white ring-1 ring-inset ring-brass/30 transition hover:bg-leaf"
-                  >
+                  <Link href={`/schools?city=${encodeURIComponent(city)}`} className={cardClass}>
                     {inner}
                   </Link>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-line bg-white px-6 py-7 text-ink">{inner}</div>
+                  <div className={cardClass}>{inner}</div>
                 )}
               </li>
             );
