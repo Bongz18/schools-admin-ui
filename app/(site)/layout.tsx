@@ -110,12 +110,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           <div>
             <h2 className="text-sm font-semibold text-white/50">For schools</h2>
             <ul className="mt-3 space-y-2 text-[0.95rem]">
-              <li><Link href="/for-schools" className="text-white/85 hover:text-white">Why list with us</Link></li>
-              <li>
-                <a href="mailto:schoolspotzw@gmail.com?subject=List%20our%20school%20on%20SchoolSpot" className="text-white/85 hover:text-white">
-                  List your school free
-                </a>
-              </li>
+              <li><Link href="/for-schools" className="text-white/85 hover:text-white">List your school free</Link></li>
               <li><Link href="/login" className="text-white/85 hover:text-white">Staff sign in</Link></li>
             </ul>
           </div>

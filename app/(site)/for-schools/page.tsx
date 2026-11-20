@@ -38,6 +38,13 @@ export default function ForSchoolsPage() {
             >
               List your school free
             </a>
+            <p className="mt-4 text-[0.95rem] text-ink/75">
+              Or email us at{" "}
+              <a href="mailto:schoolspotzw@gmail.com" className="select-all font-semibold text-leaf underline decoration-leaf/30 underline-offset-4">
+                schoolspotzw@gmail.com
+              </a>
+              , with &quot;List our school&quot; in the subject.
+            </p>
           </div>
         </div>
 
