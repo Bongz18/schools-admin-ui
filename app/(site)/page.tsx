@@ -210,7 +210,7 @@ export default async function HomePage() {
               <>
                 <span className="font-display text-[1.7rem] leading-none">{city}</span>
                 <span className={`mt-2 block text-sm ${count ? "text-white/75" : "text-granite"}`}>
-                  {count ? `${count} ${count === 1 ? "school" : "schools"} →` : "Schools coming soon"}
+                  {count ? `${count} ${count === 1 ? "school" : "schools"} →` : "More schools are joining"}
                 </span>
               </>
             );

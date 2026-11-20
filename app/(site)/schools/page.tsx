@@ -186,11 +186,11 @@ export default async function SchoolsPage({
         !error && (
           <div className="mt-6 rounded-2xl border border-line bg-white p-8 sm:p-10">
             <h2 className="font-display text-[1.75rem] leading-tight text-ink">
-              {all.length === 0 ? "Listings open soon" : "No schools match all of those"}
+              {all.length === 0 ? "More schools are joining SchoolSpot" : "No schools match all of those"}
             </h2>
             <p className="mt-3 max-w-lg text-ink/75">
               {all.length === 0
-                ? "We're checking our first schools with the schools themselves. Come back soon."
+                ? "We add each school once it has checked and approved its own profile."
                 : "Try a higher fee limit, or remove one of the filters."}
             </p>
           </div>
