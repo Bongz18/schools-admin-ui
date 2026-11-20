@@ -12,7 +12,7 @@ function Wordmark({ light = false, withMark = false }: { light?: boolean; withMa
         <span className={`font-display text-[1.45rem] leading-none tracking-tight min-[400px]:text-[1.65rem] ${light ? "text-white" : "text-ink"}`}>
           SchoolSpot
         </span>
-        <span className={`text-[0.8rem] font-medium min-[400px]:text-sm ${light ? "text-white/60" : "text-brass"}`}>Zimbabwe</span>
+        <span className={`text-[0.8rem] font-medium max-[359px]:hidden min-[400px]:text-sm ${light ? "text-white/60" : "text-brass"}`}>Zimbabwe</span>
       </span>
     </span>
   );
