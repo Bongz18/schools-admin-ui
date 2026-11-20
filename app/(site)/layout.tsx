@@ -21,7 +21,8 @@ function Wordmark({ light = false, withMark = false }: { light?: boolean; withMa
 const NAV = [
   { href: "/schools", label: "Find a school" },
   { href: "/compare", label: "Compare" },
-  { href: "/#for-schools", label: "For schools" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/for-schools", label: "For schools" },
 ];
 
 // Public SchoolSpot Zimbabwe pages (the admin dashboard has its own layout).
@@ -43,7 +44,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </Link>
 
           {/* Desktop and tablet */}
-          <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium md:flex">
+          <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium lg:flex">
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className="rounded-full px-3.5 py-2 text-ink/80 transition hover:bg-leaf-soft hover:text-ink">
                 {item.label}
@@ -58,7 +59,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </nav>
 
           {/* Phones: a simple menu that opens below the header (no JavaScript needed) */}
-          <details className="group relative md:hidden">
+          <details className="group relative lg:hidden">
             <summary className="flex shrink-0 cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-sm min-[400px]:px-3.5 font-semibold text-ink [&::-webkit-details-marker]:hidden">
               <span aria-hidden="true" className="flex flex-col gap-[3px]">
                 <span className="block h-[1.5px] w-4 bg-ink transition group-open:translate-y-[4.5px] group-open:rotate-45" />
@@ -102,11 +103,13 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <ul className="mt-3 space-y-2 text-[0.95rem]">
               <li><Link href="/schools" className="text-white/85 hover:text-white">Find a school</Link></li>
               <li><Link href="/compare" className="text-white/85 hover:text-white">Compare schools</Link></li>
+              <li><Link href="/how-it-works" className="text-white/85 hover:text-white">How it works</Link></li>
             </ul>
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white/50">For schools</h2>
             <ul className="mt-3 space-y-2 text-[0.95rem]">
+              <li><Link href="/for-schools" className="text-white/85 hover:text-white">Why list with us</Link></li>
               <li>
                 <a href="mailto:schoolspotzw@gmail.com?subject=List%20our%20school%20on%20SchoolSpot" className="text-white/85 hover:text-white">
                   List your school free

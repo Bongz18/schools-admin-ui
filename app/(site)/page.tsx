@@ -3,7 +3,6 @@ import { publicSupabase } from "@/lib/supabaseServer";
 import { BOARDING_LABELS, FEE_OPTIONS, GENDER_LABELS, feeSummary, formatUsd, locationLine } from "@/lib/schools";
 import SchoolCrest from "@/components/site/SchoolCrest";
 import SentenceChoice from "@/components/site/SentenceChoice";
-import HighlightList from "@/components/site/HighlightList";
 import { VerifiedSeal } from "@/components/site/VerifiedBadge";
 
 export const revalidate = 60;
@@ -40,22 +39,6 @@ async function getHomeData() {
 const LAUNCH_CITIES = ["Harare", "Bulawayo", "Gweru"];
 
 const HERO_POINTS = ["Fees and exam results in one place", "Details confirmed by the schools", "Free for parents, no sign-up"];
-
-const STEPS = [
-  { title: "Search", body: "Filter by city, fees, boarding and whether the school takes girls, boys or both." },
-  { title: "Compare", body: "Put up to three schools side by side: fees, curriculum, boarding and results on one screen." },
-  { title: "Contact", body: "Email or call the school directly about places, fees and open days, using the details on its page." },
-];
-
-// Shown as headed points ("Heading: description") in the For schools band.
-const PROFILE_INCLUDES = [
-  "Fees, clearly set out: Day fees for every level, with boarding shown separately.",
-  "Exam results: Pass rates year by year, with top grades where the school reports them.",
-  "Highlights: New subjects, sports and cultural achievements, in the school's own words.",
-  "Direct contacts: Emails for admissions and each division, plus the school's social pages.",
-  "The verified seal: A gold seal once the school has confirmed its own details.",
-  "Your approval first: Nothing goes live until the school has checked and approved its profile.",
-];
 
 export default async function HomePage() {
   const { featured, cityCounts } = await getHomeData();
@@ -230,61 +213,6 @@ export default async function HomePage() {
             );
           })}
         </ul>
-      </section>
-
-      <section aria-labelledby="how" className="border-y border-line bg-white">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
-          <span aria-hidden="true" className="block h-px w-10 bg-brass" />
-          <h2 id="how" className="mt-4 font-display text-[2rem] leading-tight tracking-tight text-ink sm:text-[2.35rem]">
-            How SchoolSpot works
-          </h2>
-          <p className="mt-2 max-w-xl text-granite">From a first search to a reply from the school, in three steps.</p>
-          <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-0 md:divide-x md:divide-line">
-            {STEPS.map((step, index) => (
-              <li key={step.title} className="md:px-10 md:first:pl-0 md:last:pr-0">
-                <span className="font-display text-[2.6rem] leading-none text-brass">{index + 1}</span>
-                <h3 className="mt-4 font-display text-[1.6rem] leading-tight text-leaf">{step.title}</h3>
-                <p className="mt-3 leading-relaxed text-ink/75">{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <section aria-labelledby="for-schools" className="scroll-mt-20 border-b border-line bg-leaf-soft/55">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-20">
-            <div>
-              <span aria-hidden="true" className="block h-px w-10 bg-brass" />
-              <h2
-                id="for-schools"
-                className="scroll-mt-28 mt-5 font-display text-[2.4rem] leading-[1.06] tracking-tight text-ink sm:text-[3.25rem]"
-              >
-                Your school, presented properly.
-              </h2>
-            </div>
-            <div>
-              <p className="max-w-md text-lg leading-relaxed text-ink/75">
-                Listing is free. We build your profile from the details you send us, and you approve every word before it
-                goes live.
-              </p>
-              <a
-                href="mailto:schoolspotzw@gmail.com?subject=List%20our%20school%20on%20SchoolSpot"
-                className="mt-7 inline-flex rounded-full bg-leaf px-7 py-3 font-semibold text-white shadow-[0_8px_20px_-10px_rgba(18,48,31,0.6)] transition-colors hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
-              >
-                List your school free
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-16 border-t border-leaf/15 pt-12">
-            <h3 className="font-display text-[1.6rem] leading-tight text-ink">Every profile includes</h3>
-            <HighlightList items={PROFILE_INCLUDES} tone="light" className="mt-6 lg:grid-cols-3" />
-            <p className="mt-10 max-w-2xl text-sm leading-relaxed text-granite">
-              Fees change from term to term, so every profile shows where its figures came from.
-            </p>
-          </div>
-        </div>
       </section>
     </>
   );
