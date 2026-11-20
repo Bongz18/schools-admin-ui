@@ -17,7 +17,7 @@ async function getStats() {
 const STEPS = [
   { title: "Search", body: "Filter by city, fees, boarding and whether the school takes girls, boys or both." },
   { title: "Compare", body: "Put up to three schools side by side: fees, curriculum, boarding and results on one screen." },
-  { title: "Enquire", body: "Send one message from SchoolSpot and hear back about places, fees and open days." },
+  { title: "Contact", body: "Email or call the school directly about places, fees and open days, using the details on its page." },
 ];
 
 // Shown as headed points ("Heading: description") in the For schools band.

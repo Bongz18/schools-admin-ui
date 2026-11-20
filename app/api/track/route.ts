@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/adminAuth";
 
-// Records anonymous interest in a school: a profile view or an "add to compare".
+// Records anonymous interest in a school: a profile view, an "add to compare", or a click on
+// one of the "Contact the school" buttons (email, phone, website).
 // No personal data is stored: just which school, what happened, and when.
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const TYPES = new Set(["view", "compare_add"]);
+const TYPES = new Set(["view", "compare_add", "contact_email", "contact_phone", "contact_website"]);
 const BOTS = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|headless|lighthouse/i;
 
 export async function POST(request: NextRequest) {

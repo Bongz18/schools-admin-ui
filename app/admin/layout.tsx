@@ -9,7 +9,6 @@ import { toast } from "react-hot-toast";
 
 const NAV_ITEMS = [
   { href: "/admin/applications", label: "Applications" },
-  { href: "/admin/enquiries", label: "Enquiries" },
   { href: "/admin/schools", label: "Schools" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/audit", label: "Audit log" },

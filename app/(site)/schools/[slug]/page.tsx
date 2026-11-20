@@ -10,7 +10,7 @@ import {
   locationLine,
 } from "@/lib/schools";
 import SchoolProfileView from "@/components/site/SchoolProfileView";
-import EnquiryForm from "@/components/site/EnquiryForm";
+import ContactSchoolPanel from "@/components/site/ContactSchoolPanel";
 import TrackView from "@/components/site/TrackView";
 import { sectionClass } from "@/lib/ui";
 import SectionTitle from "@/components/site/SectionTitle";
@@ -56,15 +56,21 @@ export default async function SchoolPage({ params }: { params: Promise<{ slug: s
   return (
     <SchoolProfileView school={school} results={results}>
       <TrackView schoolId={school.id} />
-      <section id="enquire" aria-labelledby="enquire-heading" className={sectionClass}>
+      <section id="contact" aria-labelledby="contact-heading" className={sectionClass}>
         <div className="rounded-2xl bg-leaf-soft/60 p-6 sm:p-8">
           <SectionTitle
-            id="enquire-heading"
-            title={`Ask ${school.name} a question`}
-            lede="Ask about places, fees, boarding or open days. It takes a minute."
+            id="contact-heading"
+            title={`Contact ${school.name}`}
+            lede="Ask the school directly about places, fees, boarding or open days."
           />
           <div className="mt-6">
-            <EnquiryForm schoolId={school.id} schoolName={school.name} />
+            <ContactSchoolPanel
+              schoolId={school.id}
+              schoolName={school.name}
+              email={school.email}
+              phone={school.phone}
+              website={school.website}
+            />
           </div>
         </div>
       </section>

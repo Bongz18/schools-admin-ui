@@ -20,7 +20,7 @@ type SchoolRow = {
   status: string;
 };
 
-type Stats = { views: number; compare_adds: number; enquiries: number };
+type Stats = { views: number; compare_adds: number; contacts: number };
 
 export default function SchoolsPage() {
   const [schools, setSchools] = useState<SchoolRow[]>([]);
@@ -53,11 +53,11 @@ export default function SchoolsPage() {
       return;
     }
     const next: Record<string, Stats> = {};
-    for (const row of (data ?? []) as { school_id: string; views: number; compare_adds: number; enquiries: number }[]) {
+    for (const row of (data ?? []) as { school_id: string; views: number; compare_adds: number; contacts: number }[]) {
       next[row.school_id] = {
         views: Number(row.views),
         compare_adds: Number(row.compare_adds),
-        enquiries: Number(row.enquiries),
+        contacts: Number(row.contacts),
       };
     }
     setStats(next);
@@ -120,7 +120,7 @@ export default function SchoolsPage() {
           <h1 className="text-3xl font-bold text-slate-900">Schools</h1>
           <p className="mt-1 text-sm text-slate-600">
             {schools.length} schools · {verifiedCount} verified · {publishedCount} live on SchoolSpot · views,
-            compares and enquiries are for the last 30 days
+            compares and contact clicks are for the last 30 days
           </p>
         </div>
         <input
@@ -154,7 +154,7 @@ export default function SchoolsPage() {
                 <th className="px-4 py-3">Fees</th>
                 <th className="px-4 py-3" title="Last 30 days">Views</th>
                 <th className="px-4 py-3" title="Last 30 days">Compares</th>
-                <th className="px-4 py-3" title="Last 30 days">Enquiries</th>
+                <th className="px-4 py-3" title="Clicks on Email, Call or Website in the last 30 days">Contacts</th>
                 <th className="px-4 py-3">Checked</th>
                 <th className="px-4 py-3">On SchoolSpot</th>
                 <th className="px-4 py-3 text-right">Actions</th>
@@ -173,7 +173,7 @@ export default function SchoolsPage() {
                     <td className="px-4 py-3 text-slate-700">{feeSummary(school)}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{stats[school.id]?.views ?? 0}</td>
                     <td className="px-4 py-3 tabular-nums text-slate-700">{stats[school.id]?.compare_adds ?? 0}</td>
-                    <td className="px-4 py-3 tabular-nums text-slate-700">{stats[school.id]?.enquiries ?? 0}</td>
+                    <td className="px-4 py-3 tabular-nums text-slate-700">{stats[school.id]?.contacts ?? 0}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${

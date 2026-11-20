@@ -38,18 +38,17 @@ export default function TermsPage() {
         </ul>
       </LegalSection>
 
-      <LegalSection title="Enquiries">
+      <LegalSection title="Contacting schools">
         <ul>
           <li>
-            When you send an enquiry, it comes to SchoolSpot first and we pass it on to the school. Please allow time for
-            this.
+            The contact buttons on a school&apos;s page take you straight to the school. Your message goes directly from you to
+            the school, and SchoolSpot is not part of that conversation.
           </li>
-          <li>An enquiry is not an application for a place, and it does not reserve a place.</li>
+          <li>Contacting a school is not an application for a place, and it does not reserve a place.</li>
           <li>
             We can&apos;t guarantee that a school will reply, or the outcome of any application. Admissions decisions are made
             by the school alone.
           </li>
-          <li>Please only send genuine enquiries, and only with your own contact details.</li>
         </ul>
       </LegalSection>
 
@@ -94,7 +93,7 @@ export default function TermsPage() {
 
       <LegalSection title="Your personal information">
         <p>
-          Our <Link href="/privacy">Privacy Policy</Link> explains how we handle personal information, including enquiries.
+          Our <Link href="/privacy">Privacy Policy</Link> explains how we handle personal information.
         </p>
       </LegalSection>
 

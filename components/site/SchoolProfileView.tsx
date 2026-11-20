@@ -100,10 +100,10 @@ export default function SchoolProfileView({
             <CompareToggle schoolId={school.id} size="md" />
             {children && (
               <a
-                href="#enquire"
+                href="#contact"
                 className="rounded-full px-4 py-2 text-sm font-semibold text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf"
               >
-                Ask the school a question
+                Contact the school
               </a>
             )}
           </div>
@@ -175,7 +175,7 @@ export default function SchoolProfileView({
                 ))}
               </dl>
             ) : (
-              <p className="mt-4 text-[0.95rem] text-granite">Use the enquiry form and we&apos;ll put you in touch.</p>
+              <p className="mt-4 text-[0.95rem] text-granite">We don&apos;t have contact details for this school yet.</p>
             )}
             <SocialLinks links={school.social_links ?? []} />
           </div>

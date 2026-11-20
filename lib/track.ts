@@ -2,7 +2,9 @@
 
 // Sends one anonymous event to /api/track. Each browser counts once per school per
 // session for each event type, so refreshing a page doesn't inflate the numbers.
-export function trackSchoolEvent(schoolId: string, type: "view" | "compare_add") {
+export type SchoolEventType = "view" | "compare_add" | "contact_email" | "contact_phone" | "contact_website";
+
+export function trackSchoolEvent(schoolId: string, type: SchoolEventType) {
   try {
     const key = `schoolspot-tracked-${type}-${schoolId}`;
     if (window.sessionStorage.getItem(key)) return;
