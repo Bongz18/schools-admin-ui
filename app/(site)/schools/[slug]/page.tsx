@@ -41,9 +41,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const school = await getSchool(slug);
   if (!school) return { title: "School not found | SchoolSpot Zimbabwe" };
+  const title = `${school.name}: fees and details | SchoolSpot Zimbabwe`;
+  const description = `${school.name}, ${locationLine(school)}. ${feeSummary(school)}. Compare it with other schools on SchoolSpot Zimbabwe.`;
   return {
-    title: `${school.name}: fees and details | SchoolSpot Zimbabwe`,
-    description: `${school.name}, ${locationLine(school)}. ${feeSummary(school)}. Compare it with other schools on SchoolSpot Zimbabwe.`,
+    title,
+    description,
+    alternates: { canonical: `/schools/${slug}` },
+    openGraph: {
+      type: "website",
+      siteName: "SchoolSpot Zimbabwe",
+      title: `${school.name} | SchoolSpot Zimbabwe`,
+      description,
+      url: `/schools/${slug}`,
+      locale: "en_GB",
+    },
+    twitter: { card: "summary_large_image", title: `${school.name} | SchoolSpot Zimbabwe`, description },
   };
 }
 

@@ -19,8 +19,24 @@ const caslon = Libre_Caslon_Display({ subsets: ["latin"], weight: "400", variabl
 const hanken = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-hanken", display: "swap" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.schoolspot.co.zw"),
   title: "SchoolSpot Zimbabwe",
-  description: "Find and compare schools across Zimbabwe.",
+  description: "Find and compare schools across Zimbabwe: fees, exam results and contact details in one place.",
+  applicationName: "SchoolSpot Zimbabwe",
+  // Link previews (WhatsApp, Facebook, LinkedIn, X). The image is app/opengraph-image.jpg.
+  openGraph: {
+    type: "website",
+    siteName: "SchoolSpot Zimbabwe",
+    title: "SchoolSpot Zimbabwe",
+    description: "Find and compare schools across Zimbabwe: fees, exam results and contact details in one place.",
+    url: "/",
+    locale: "en_GB",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SchoolSpot Zimbabwe",
+    description: "Find and compare schools across Zimbabwe.",
+  },
 };
 
 export default function RootLayout({
