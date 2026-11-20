@@ -4,7 +4,15 @@ import { BOARDING_LABELS, FEE_OPTIONS, GENDER_LABELS, feeSummary, formatUsd, loc
 import SchoolCrest from "@/components/site/SchoolCrest";
 import SentenceChoice from "@/components/site/SentenceChoice";
 import { VerifiedSeal } from "@/components/site/VerifiedBadge";
-import { PREMIUM_CARD, PREMIUM_SHEEN, PREMIUM_THEMES, premiumTheme } from "@/components/site/premiumTheme";
+import {
+  PREMIUM_CARD,
+  PREMIUM_CORNER_BR,
+  PREMIUM_CORNER_TL,
+  PREMIUM_FRAME,
+  PREMIUM_ROUNDEL,
+  PREMIUM_SHEEN,
+  PREMIUM_WATERMARK,
+} from "@/components/site/premiumTheme";
 
 export const revalidate = 60;
 
@@ -39,11 +47,11 @@ async function getHomeData() {
 // Cities we are building listings for, in the order parents are most likely to look.
 const LAUNCH_CITIES = ["Harare", "Bulawayo", "Gweru"];
 
-// Each launch city has its own colour and region line; other cities take the next colour in turn.
-const CITY_STYLE: Record<string, { theme: number; region: string }> = {
-  Harare: { theme: 1, region: "Harare Province" },
-  Bulawayo: { theme: 2, region: "Matabeleland" },
-  Gweru: { theme: 0, region: "Midlands" },
+// Region line shown above each launch city's name.
+const CITY_REGION: Record<string, string> = {
+  Harare: "Harare Province",
+  Bulawayo: "Matabeleland",
+  Gweru: "Midlands",
 };
 
 const HERO_POINTS = ["Fees and exam results in one place", "Details confirmed by the schools", "Free for parents, no sign-up"];
@@ -195,33 +203,31 @@ export default async function HomePage() {
           Browse by city
         </h2>
         <ul className="mt-8 grid gap-4 sm:grid-cols-3 sm:gap-5">
-          {cities.map((city, i) => {
+          {cities.map((city) => {
             const count = cityCounts.get(city) ?? 0;
-            const style = CITY_STYLE[city];
-            const theme = style ? PREMIUM_THEMES[style.theme] : premiumTheme(i);
+            const region = CITY_REGION[city];
             const inner = (
               <>
+                <span className={PREMIUM_FRAME} aria-hidden="true" />
                 <span className={PREMIUM_SHEEN} aria-hidden="true" />
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -bottom-8 -right-2 -z-10 font-display text-[9rem] leading-none transition-transform duration-500 group-hover:-translate-y-2 ${theme.initial}`}
-                >
+                <span className={PREMIUM_CORNER_TL} aria-hidden="true" />
+                <span className={PREMIUM_CORNER_BR} aria-hidden="true" />
+                <span aria-hidden="true" className={`${PREMIUM_WATERMARK} -bottom-9 right-6 text-[9rem]`}>
                   {city.charAt(0)}
                 </span>
-                {style && (
-                  <span className="block text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#e2c58f]">
-                    {style.region}
-                  </span>
+                {region && (
+                  <span className="block text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-brass">{region}</span>
                 )}
-                <span className="mt-2 block font-display text-[1.9rem] leading-none">{city}</span>
-                <span className="mt-6 flex items-center justify-between gap-3 text-sm">
-                  <span className={count ? "font-semibold text-white" : "text-white/70"}>
+                <span className="mt-2 block font-display text-[1.9rem] leading-none text-ink">{city}</span>
+                <span aria-hidden="true" className="mt-4 block h-px w-8 bg-brass/50 transition-all duration-300 group-hover:w-14" />
+                <span className="mt-4 flex items-center justify-between gap-3 text-sm">
+                  <span className={count ? "font-semibold text-ink" : "text-granite"}>
                     {count ? `${count} ${count === 1 ? "school" : "schools"}` : "More schools are joining"}
                   </span>
                   {count > 0 && (
                     <span
                       aria-hidden="true"
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-[#e2c58f] ring-1 ring-brass/50 transition duration-300 group-hover:translate-x-1 group-hover:bg-brass group-hover:text-white"
+                      className={`${PREMIUM_ROUNDEL} mr-3 h-9 w-9 group-hover:translate-x-1 group-hover:bg-brass group-hover:text-white`}
                     >
                       →
                     </span>
@@ -229,7 +235,7 @@ export default async function HomePage() {
                 </span>
               </>
             );
-            const cardClass = `${PREMIUM_CARD} ${theme.card} ${theme.glow} px-6 pb-6 pt-7`;
+            const cardClass = `${PREMIUM_CARD} px-7 pb-7 pt-8`;
             return (
               <li key={city}>
                 {count ? (
