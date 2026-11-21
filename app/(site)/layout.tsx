@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CompareBar from "@/components/site/CompareBar";
+import MobileMenu from "@/components/site/MobileMenu";
 
 function Wordmark({ light = false, withMark = false }: { light?: boolean; withMark?: boolean }) {
   return (
@@ -60,30 +61,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             </Link>
           </nav>
 
-          {/* Phones: a simple menu that opens below the header (no JavaScript needed) */}
-          <details className="group relative lg:hidden">
-            <summary className="flex shrink-0 cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-sm min-[400px]:px-3.5 font-semibold text-ink [&::-webkit-details-marker]:hidden">
-              <span aria-hidden="true" className="flex flex-col gap-[3px]">
-                <span className="block h-[1.5px] w-4 bg-ink transition group-open:translate-y-[4.5px] group-open:rotate-45" />
-                <span className="block h-[1.5px] w-4 bg-ink transition group-open:opacity-0" />
-                <span className="block h-[1.5px] w-4 bg-ink transition group-open:-translate-y-[4.5px] group-open:-rotate-45" />
-              </span>
-              Menu
-            </summary>
-            <nav
-              aria-label="Main"
-              className="absolute right-0 top-[calc(100%+0.6rem)] w-60 overflow-hidden rounded-2xl border border-line bg-white p-2 shadow-[0_24px_50px_-24px_rgba(15,42,34,0.45)]"
-            >
-              {NAV.map((item) => (
-                <Link key={item.href} href={item.href} className="block rounded-xl px-4 py-3 text-ink hover:bg-leaf-soft">
-                  {item.label}
-                </Link>
-              ))}
-              <Link href="/schools" className="mt-1 block rounded-xl bg-leaf px-4 py-3 text-center font-semibold text-white">
-                Search schools
-              </Link>
-            </nav>
-          </details>
+          {/* Phones and tablets */}
+          <MobileMenu items={NAV} />
         </div>
       </header>
 
