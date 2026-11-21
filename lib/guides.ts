@@ -8,6 +8,13 @@ export type GuideSummary = {
 
 export const GUIDES: GuideSummary[] = [
   {
+    slug: "school-calendar-2027",
+    title: "2027 school calendar: term dates for Zimbabwe",
+    summary:
+      "When schools open and close in 2027, the holidays in between, and how many school days each term has. Plus what to check with your school.",
+    updated: "2026-11-21",
+  },
+  {
     slug: "zimsec-2027",
     title: "ZIMSEC from 2027: what it means for your child",
     summary:
