@@ -32,7 +32,7 @@ const NAV = [
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`flex min-h-screen flex-col overflow-x-clip bg-paper font-body text-[1.0625rem] text-ink antialiased`}
+      className={`flex min-h-screen flex-col overflow-x-clip bg-paper print:bg-white font-body text-[1.0625rem] text-ink antialiased`}
     >
       <a
         href="#main"
