@@ -19,20 +19,24 @@ function Wordmark({ light = false, withMark = false }: { light?: boolean; withMa
   );
 }
 
+// Kept short for a clean header. The logo already goes home, the green "Search schools" button
+// opens /schools (Find a school), and "How it works" is in the footer, so none of them takes a
+// separate place in the bar.
 const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/schools", label: "Find a school" },
   { href: "/compare", label: "Compare" },
-  { href: "/how-it-works", label: "How it works" },
+  { href: "/school-term", label: "School term" },
   { href: "/guides", label: "Guides" },
   { href: "/for-schools", label: "For schools" },
 ];
+
+// The phone menu also offers Home first, as people expect it there.
+const MOBILE_NAV = [{ href: "/", label: "Home" }, ...NAV];
 
 // Public SchoolSpot Zimbabwe pages (the admin dashboard has its own layout).
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`flex min-h-screen flex-col overflow-x-clip bg-paper font-body text-[1.0625rem] text-ink antialiased`}
+      className={`flex min-h-screen flex-col overflow-x-clip bg-paper print:bg-white font-body text-[1.0625rem] text-ink antialiased`}
     >
       <a
         href="#main"
@@ -40,13 +44,13 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur">
+      <header className="sticky top-0 z-40 print:hidden border-b border-line bg-paper/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 min-[400px]:px-5 sm:px-8">
           <Link href="/" aria-label="SchoolSpot Zimbabwe home" className="rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-leaf">
             <Wordmark withMark />
           </Link>
 
-          {/* Desktop and tablet */}
+          {/* Desktop and laptop */}
           <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium lg:flex">
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className="rounded-full px-3.5 py-2 text-ink/80 transition hover:bg-leaf-soft hover:text-ink">
@@ -62,7 +66,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </nav>
 
           {/* Phones and tablets */}
-          <MobileMenu items={NAV} />
+          <MobileMenu items={MOBILE_NAV} />
         </div>
       </header>
 
@@ -70,7 +74,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
 
-      <footer className="bg-leaf-dark text-white">
+      <footer className="bg-leaf-dark text-white print:hidden">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
           <div className="max-w-sm">
             <Wordmark light withMark />
@@ -85,6 +89,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               <li><Link href="/schools" className="text-white/85 hover:text-white">Find a school</Link></li>
               <li><Link href="/compare" className="text-white/85 hover:text-white">Compare schools</Link></li>
               <li><Link href="/how-it-works" className="text-white/85 hover:text-white">How it works</Link></li>
+              <li><Link href="/school-term" className="text-white/85 hover:text-white">School term</Link></li>
               <li><Link href="/guides" className="text-white/85 hover:text-white">Guides for parents</Link></li>
             </ul>
           </div>

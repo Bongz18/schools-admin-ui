@@ -186,3 +186,11 @@
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* Printing: plain white paper, no page background colour. */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+}
