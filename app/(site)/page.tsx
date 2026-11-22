@@ -4,6 +4,7 @@ import { BOARDING_LABELS, FEE_OPTIONS, GENDER_LABELS, feeSummary, formatUsd, loc
 import SchoolCrest from "@/components/site/SchoolCrest";
 import SentenceChoice from "@/components/site/SentenceChoice";
 import { VerifiedSeal } from "@/components/site/VerifiedBadge";
+import { upcomingTerm } from "@/lib/schoolCalendar";
 import {
   PREMIUM_CARD,
   PREMIUM_CORNER_BR,
@@ -58,8 +59,11 @@ const HERO_POINTS = ["Fees and exam results in one place", "Details confirmed by
 
 export default async function HomePage() {
   const { featured, cityCounts } = await getHomeData();
+  const nextTerm = upcomingTerm();
   const cityOptions = Array.from(new Set([...LAUNCH_CITIES, ...cityCounts.keys()])).sort();
-  const cities = Array.from(new Set([...LAUNCH_CITIES, ...cityCounts.keys()]));
+  // Browse by city shows only cities that have published schools, and only once there are two or more,
+  // so the home page never shows empty "More schools are joining" cards.
+  const cities = Array.from(new Set([...LAUNCH_CITIES, ...cityCounts.keys()])).filter((city) => (cityCounts.get(city) ?? 0) > 0);
 
   return (
     <>
@@ -68,7 +72,7 @@ export default async function HomePage() {
           Find the right school in Zimbabwe.
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/75">
-          Fees, boarding, results and contacts for schools across the country, checked with the schools themselves.
+          Fees, boarding, results and contacts for schools across the country.
         </p>
         <ul className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-x-7">
           {HERO_POINTS.map((point) => (
@@ -121,16 +125,13 @@ export default async function HomePage() {
             />
             <span>a term.</span>
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="mt-10">
             <button
               type="submit"
               className="rounded-full bg-leaf px-7 py-3 font-semibold text-white hover:bg-leaf-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leaf"
             >
               Show me schools
             </button>
-            <Link href="/schools" className="text-[0.95rem] font-semibold text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf">
-              Or browse all schools
-            </Link>
           </div>
         </form>
 
@@ -138,6 +139,18 @@ export default async function HomePage() {
           <VerifiedSeal className="h-5 w-5 shrink-0" />
           Schools with the gold seal have confirmed their own details with us.
         </p>
+
+        {nextTerm && (
+          <Link
+            href="/school-term"
+            className="group mt-4 inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-brass/40 bg-brass/10 px-4 py-2 text-[0.95rem] text-ink transition hover:border-brass/70"
+          >
+            <span className="font-semibold">
+              {nextTerm.term} {nextTerm.opensOn.slice(0, 4)} starts {nextTerm.opens.replace(/ \d{4}$/, "")}.
+            </span>
+            <span className="text-leaf group-hover:underline">Term dates and packing list →</span>
+          </Link>
+        )}
       </section>
 
       {featured.length > 0 && (
@@ -148,10 +161,9 @@ export default async function HomePage() {
               <h2 id="featured" className="mt-4 font-display text-[2rem] leading-tight tracking-tight text-ink sm:text-[2.35rem]">
                 Schools on SchoolSpot
               </h2>
-              <p className="mt-2 max-w-xl text-granite">Full profiles, confirmed with the schools themselves.</p>
             </div>
             <Link href="/schools" className="font-semibold text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf">
-              See all schools →
+              Find a school →
             </Link>
           </div>
           <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -197,6 +209,7 @@ export default async function HomePage() {
         </section>
       )}
 
+      {cities.length >= 2 && (
       <section aria-labelledby="cities" className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
         <span aria-hidden="true" className="block h-px w-10 bg-brass" />
         <h2 id="cities" className="mt-4 font-display text-[2rem] leading-tight tracking-tight text-ink sm:text-[2.35rem]">
@@ -250,6 +263,7 @@ export default async function HomePage() {
           })}
         </ul>
       </section>
+      )}
     </>
   );
 }
