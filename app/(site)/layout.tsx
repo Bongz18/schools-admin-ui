@@ -40,7 +40,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur">
+      <header className="sticky top-0 z-40 print:hidden border-b border-line bg-paper/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 min-[400px]:px-5 sm:px-8">
           <Link href="/" aria-label="SchoolSpot Zimbabwe home" className="rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-leaf">
             <Wordmark withMark />
@@ -70,7 +70,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
 
-      <footer className="bg-leaf-dark text-white">
+      <footer className="bg-leaf-dark text-white print:hidden">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
           <div className="max-w-sm">
             <Wordmark light withMark />

@@ -8,6 +8,13 @@ export type GuideSummary = {
 
 export const GUIDES: GuideSummary[] = [
   {
+    slug: "boarding-packing-list",
+    title: "Boarding school packing list for Zimbabwe",
+    summary:
+      "A printable checklist for new boarders: trunks and padlocks, bedding, uniform, toiletries, groceries and tuck, plus the items schools usually ban and what to ask before you shop.",
+    updated: "2026-11-22",
+  },
+  {
     slug: "school-calendar-2027",
     title: "2027 school calendar: term dates for Zimbabwe",
     summary:
