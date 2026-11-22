@@ -9,6 +9,14 @@ export type GuideSummary = {
 
 export const GUIDES: GuideSummary[] = [
   {
+    slug: "form-one-emap-2027",
+    title: "Form One boarding places for 2027: how to apply on eMAP",
+    summary:
+      "Applications for 2027 Form One boarding places are open on the Ministry's eMAP portal until 31 December. How to apply, how many schools you can choose and what to ask each school.",
+    updated: "2026-11-22",
+    topics: ["school-term"],
+  },
+  {
     slug: "boarding-packing-list",
     title: "Boarding school packing list for Zimbabwe",
     summary:
