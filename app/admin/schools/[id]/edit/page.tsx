@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 import supabase from "@/lib/supabaseClient";
 import { adminFetch } from "@/lib/adminFetch";
 import { FEE_CURRENCIES, formatFeeGroups, parseFeeGroups } from "@/lib/fees";
-import { BOARDING_LABELS, CURRICULUM_OPTIONS, GENDER_LABELS, SCHOOL_COLUMNS, TYPE_LABELS, type School } from "@/lib/schools";
+import { BOARDING_LABELS, CURRICULUM_OPTIONS, EMAP_LABELS, GENDER_LABELS, SCHOOL_COLUMNS, TYPE_LABELS, type School } from "@/lib/schools";
 
 type FormState = Record<string, string>;
 
@@ -97,7 +97,7 @@ export default function EditSchoolPage() {
 
     const fields: Record<string, unknown> = { curriculum };
     for (const field of TEXT_FIELDS) fields[field.key] = form[field.key] ?? "";
-    for (const key of ["school_type", "gender", "boarding", "fees_text", "fees_source", "fee_currency"]) fields[key] = form[key] ?? "";
+    for (const key of ["school_type", "gender", "boarding", "emap_form1", "fees_text", "fees_source", "fee_currency"]) fields[key] = form[key] ?? "";
     fields.fee_groups = parseFeeGroups(form.fee_groups ?? "");
     fields.highlights = (form.highlights ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
     fields.contacts = parseContacts(form.contacts ?? "");
@@ -244,6 +244,16 @@ export default function EditSchoolPage() {
                 <option key={value} value={value}>{text}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <label htmlFor="emap_form1" className={label}>Form One boarding applications</label>
+            <select id="emap_form1" value={form.emap_form1 ?? ""} onChange={set("emap_form1")} className={input}>
+              <option value="">Not known</option>
+              {Object.entries(EMAP_LABELS).map(([value, text]) => (
+                <option key={value} value={value}>{text}</option>
+              ))}
+            </select>
+            <p className={hint}>Secondary boarding schools only. Shown on the profile when set.</p>
           </div>
         </div>
         <fieldset>

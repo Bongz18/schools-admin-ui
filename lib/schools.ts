@@ -62,6 +62,7 @@ export type School = {
   gender: string | null;
   gender_note: string | null;
   boarding: string | null;
+  emap_form1: string | null;
   curriculum: string[] | null;
   religion: string | null;
   founded: string | null;
@@ -81,7 +82,7 @@ export type School = {
 
 // Columns safe to show the public. Kept in one place so every query asks for the same thing.
 export const SCHOOL_COLUMNS =
-  "id,slug,name,school_type,city,suburb,address,contacts,social_links,highlights,notice,awards,province,levels,gender,gender_note,boarding,curriculum,religion,founded,fees_text,fee_groups,fee_currency,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,verified_at,status,updated_at";
+  "id,slug,name,school_type,city,suburb,address,contacts,social_links,highlights,notice,awards,province,levels,gender,gender_note,boarding,emap_form1,curriculum,religion,founded,fees_text,fee_groups,fee_currency,fee_term_min_usd,fee_term_max_usd,fees_source,website,phone,email,description,verified,verified_at,status,updated_at";
 
 /** One exam result for one year, as supplied by the school. */
 export type ExamResult = {
@@ -146,6 +147,12 @@ export const BOARDING_LABELS: Record<string, string> = {
   day: "Day only",
   day_boarding: "Day and boarding",
   boarding: "Boarding only",
+};
+
+/** How Form One boarders apply. Only shown for schools with boarding. */
+export const EMAP_LABELS: Record<string, string> = {
+  yes: "Apply through the Ministry's eMAP portal",
+  no: "Apply directly to the school",
 };
 
 export const TYPE_LABELS: Record<string, string> = {

@@ -30,6 +30,7 @@ const EDITABLE: Record<string, FieldRule> = {
   gender: { kind: "choice", options: ["girls", "boys", "coed"] },
   gender_note: { kind: "text", max: 200 },
   boarding: { kind: "choice", options: ["day", "day_boarding", "boarding"] },
+  emap_form1: { kind: "choice", options: ["yes", "no"] },
   curriculum: { kind: "list", options: ["Cambridge", "ZIMSEC", "IB", "British"] },
   religion: { kind: "text", max: 120 },
   founded: { kind: "text", max: 40 },

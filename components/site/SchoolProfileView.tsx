@@ -1,5 +1,5 @@
 import type { ExamResult, School } from "@/lib/schools";
-import { BOARDING_LABELS, GENDER_LABELS, TYPE_LABELS, activeNotice, locationLine } from "@/lib/schools";
+import { BOARDING_LABELS, EMAP_LABELS, GENDER_LABELS, TYPE_LABELS, activeNotice, locationLine } from "@/lib/schools";
 import AwardsSection from "@/components/site/AwardsSection";
 import NoticeBanner from "@/components/site/NoticeBanner";
 import ListingDisclaimer, { IndependentListingNote } from "@/components/site/ListingDisclaimer";
@@ -39,6 +39,9 @@ export default function SchoolProfileView({
     { label: "Founded", value: school.founded },
     { label: "Location", value: locationLine(school) },
   ];
+  // Only for schools with boarding, and only once we know how Form One boarders apply.
+  const emap = school.emap_form1 && school.boarding && school.boarding !== "day" ? EMAP_LABELS[school.emap_form1] : null;
+  if (emap) about.push({ label: "Form One boarding", value: emap });
 
   const notice = activeNotice(school.notice);
   const awards = (school.awards ?? []).filter((award) => award && award.title);
