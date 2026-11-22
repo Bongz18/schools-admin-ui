@@ -19,15 +19,18 @@ function Wordmark({ light = false, withMark = false }: { light?: boolean; withMa
   );
 }
 
+// Kept short for a clean header. The logo already goes home, the green "Search schools" button
+// opens /schools (Find a school), and "How it works" is in the footer, so none of them takes a
+// separate place in the bar.
 const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/schools", label: "Find a school" },
   { href: "/compare", label: "Compare" },
   { href: "/school-term", label: "School term" },
-  { href: "/how-it-works", label: "How it works" },
   { href: "/guides", label: "Guides" },
   { href: "/for-schools", label: "For schools" },
 ];
+
+// The phone menu also offers Home first, as people expect it there.
+const MOBILE_NAV = [{ href: "/", label: "Home" }, ...NAV];
 
 // Public SchoolSpot Zimbabwe pages (the admin dashboard has its own layout).
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -47,8 +50,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <Wordmark withMark />
           </Link>
 
-          {/* Desktop (full bar from xl, as there are seven items) */}
-          <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium xl:flex">
+          {/* Desktop and laptop */}
+          <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium lg:flex">
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className="rounded-full px-3.5 py-2 text-ink/80 transition hover:bg-leaf-soft hover:text-ink">
                 {item.label}
@@ -63,7 +66,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </nav>
 
           {/* Phones and tablets */}
-          <MobileMenu items={NAV} />
+          <MobileMenu items={MOBILE_NAV} />
         </div>
       </header>
 
