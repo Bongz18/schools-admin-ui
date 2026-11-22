@@ -4,6 +4,7 @@ export type GuideSummary = {
   title: string;
   summary: string;
   updated: string; // ISO date the facts were last checked
+  topics?: "school-term"[]; // extra pages the guide is listed on, e.g. the School term page
 };
 
 export const GUIDES: GuideSummary[] = [
@@ -13,6 +14,7 @@ export const GUIDES: GuideSummary[] = [
     summary:
       "A printable checklist for new boarders: trunks and padlocks, bedding, uniform, toiletries, groceries and tuck, plus the items schools usually ban and what to ask before you shop.",
     updated: "2026-11-22",
+    topics: ["school-term"],
   },
   {
     slug: "school-calendar-2027",
@@ -20,6 +22,7 @@ export const GUIDES: GuideSummary[] = [
     summary:
       "When schools open and close in 2027, the holidays in between, and how many school days each term has. Plus what to check with your school.",
     updated: "2026-11-21",
+    topics: ["school-term"],
   },
   {
     slug: "zimsec-2027",

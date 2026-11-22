@@ -23,6 +23,7 @@ const NAV = [
   { href: "/", label: "Home" },
   { href: "/schools", label: "Find a school" },
   { href: "/compare", label: "Compare" },
+  { href: "/school-term", label: "School term" },
   { href: "/how-it-works", label: "How it works" },
   { href: "/guides", label: "Guides" },
   { href: "/for-schools", label: "For schools" },
@@ -46,8 +47,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <Wordmark withMark />
           </Link>
 
-          {/* Desktop and tablet */}
-          <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium lg:flex">
+          {/* Desktop (full bar from xl, as there are seven items) */}
+          <nav aria-label="Main" className="hidden items-center gap-1 text-[0.95rem] font-medium xl:flex">
             {NAV.map((item) => (
               <Link key={item.href} href={item.href} className="rounded-full px-3.5 py-2 text-ink/80 transition hover:bg-leaf-soft hover:text-ink">
                 {item.label}
@@ -85,6 +86,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               <li><Link href="/schools" className="text-white/85 hover:text-white">Find a school</Link></li>
               <li><Link href="/compare" className="text-white/85 hover:text-white">Compare schools</Link></li>
               <li><Link href="/how-it-works" className="text-white/85 hover:text-white">How it works</Link></li>
+              <li><Link href="/school-term" className="text-white/85 hover:text-white">School term</Link></li>
               <li><Link href="/guides" className="text-white/85 hover:text-white">Guides for parents</Link></li>
             </ul>
           </div>

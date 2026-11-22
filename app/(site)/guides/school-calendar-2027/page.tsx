@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { formatGuideDate } from "@/lib/guides";
+import { TERMS_2027 as TERMS } from "@/lib/schoolCalendar";
 
 const UPDATED = "2026-11-21";
 
@@ -9,12 +10,6 @@ export const metadata: Metadata = {
   description:
     "Zimbabwe's 2027 school term dates: Term 1 opens 12 January, Term 2 opens 4 May and Term 3 opens 7 September 2027. Holidays, school days per term and what to check with your school.",
 };
-
-const TERMS = [
-  { term: "Term 1", opens: "Tuesday 12 January 2027", closes: "Thursday 25 March 2027", days: 52 },
-  { term: "Term 2", opens: "Tuesday 4 May 2027", closes: "Thursday 5 August 2027", days: 67 },
-  { term: "Term 3", opens: "Tuesday 7 September 2027", closes: "Thursday 2 December 2027", days: 62 },
-];
 
 const HOLIDAYS = [
   { label: "After Term 1", dates: "26 March – 3 May 2027" },
