@@ -163,7 +163,7 @@ export default async function HomePage() {
               </h2>
             </div>
             <Link href="/schools" className="font-semibold text-leaf underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf">
-              See all schools →
+              Find a school →
             </Link>
           </div>
           <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
