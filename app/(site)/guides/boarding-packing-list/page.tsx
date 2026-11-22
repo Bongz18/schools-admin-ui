@@ -166,13 +166,13 @@ export default function BoardingPackingListGuide() {
           Every school publishes its own requirements, and the numbers and colours differ. Use your school&apos;s lists for the
           exact items, and this checklist to cover everything else.
         </p>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 print:grid-cols-2 print:gap-3">
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 print:block print:columns-2 print:gap-8">
           {CHECKLIST.map((group) => (
             <section
               key={group.title}
-              className="break-inside-avoid rounded-2xl border border-line bg-white p-5 print:rounded-none print:border-0 print:p-0"
+              className="break-inside-avoid rounded-2xl border border-line bg-white p-5 print:mb-5 print:inline-block print:w-full print:rounded-none print:border-0 print:p-0"
             >
-              <h3 className="font-display text-xl text-ink print:text-base">{group.title}</h3>
+              <h3 className="break-after-avoid font-display text-xl text-ink print:text-base">{group.title}</h3>
               <ul className="mt-3 space-y-2 text-[0.98rem] print:text-sm">
                 {group.items.map((item) => (
                   <li key={item} className="flex gap-3">
