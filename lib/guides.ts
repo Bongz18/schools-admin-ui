@@ -9,6 +9,14 @@ export type GuideSummary = {
 
 export const GUIDES: GuideSummary[] = [
   {
+    slug: "grade-7-results-2026",
+    title: "Grade 7 results 2026: what to do next for Form 1",
+    summary:
+      "The 2026 Grade 7 results are due on Friday 27 November. How to get them, how Form 1 places are decided, eMAP boarding applications before 31 December, and what to ask secondary schools.",
+    updated: "2026-11-26",
+    topics: ["school-term"],
+  },
+  {
     slug: "boarding-packing-list",
     title: "Boarding school packing list for Zimbabwe",
     summary:
