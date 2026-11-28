@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { formatGuideDate } from "@/lib/guides";
 
-const UPDATED = "2026-11-26";
+const UPDATED = "2026-11-28";
 
 export const metadata: Metadata = {
   title: "Grade 7 results 2026: next steps for Form 1 | SchoolSpot Zimbabwe",
   description:
-    "The 2026 ZIMSEC Grade 7 results are due on Friday 27 November 2026. How to get them, how Form 1 places for 2027 are decided, eMAP boarding applications, and what to ask secondary schools.",
+    "The 2026 ZIMSEC Grade 7 results are out, with a 50.94% pass rate. How to get them before the portal closes, how Form 1 places for 2027 are decided, eMAP boarding applications, and what to ask secondary schools.",
 };
 
 const STEPS = [
   {
     title: "Get the results",
-    body: "Last year, results could be viewed for a few days on the ZIMSEC online portal by entering the school's centre number. After that, results were collected from the school where your child sat the exam. Your child's primary school can tell you how it is handling this year's results.",
+    body: "Check the results on the ZIMSEC results portal (results.zimsec.co.zw) and choose your province. Reports say the portal is open for five days from 27 November, so until about Wednesday 2 December. Save or print a copy. After that, collect the result slip from the centre where your child sat the exam.",
   },
   {
     title: "Shortlist secondary schools",
@@ -25,7 +25,7 @@ const STEPS = [
   },
   {
     title: "Day places: contact schools directly",
-    body: "Ask each school how and when to apply for a day place, what documents to bring and when it will confirm a place.",
+    body: "Day places are applied for in person at each school. Some schools say they are already full, so don't wait. Ask how and when to apply, what documents to bring and when the school will confirm a place. The Ministry says every learner who sat Grade 7 will get a Form 1 place for 2027.",
   },
 ];
 
@@ -39,6 +39,15 @@ const QUESTIONS = [
 ];
 
 const SOURCES = [
+  {
+    href: "https://www.newzimbabwe.com/zimsec-grade-7-results-out-records-50-94-pass-rate/",
+    label: "NewZimbabwe: ZIMSEC Grade 7 results out, records 50.94% pass rate (27 November 2026)",
+  },
+  {
+    href: "https://www.zimbabwesituation.com/news/grade-7-pass-rate-rises-to-5094-percent/",
+    label: "The Herald (via Zimbabwe Situation): Grade 7 pass rate rises to 50,94 percent (28 November 2026)",
+  },
+  { href: "https://results.zimsec.co.zw/", label: "ZIMSEC results portal" },
   {
     href: "https://www.newzimbabwe.com/zimsec-to-release-2026-grade-7-results-on-friday/",
     label: "NewZimbabwe: ZIMSEC to release 2026 Grade 7 results on Friday (25 November 2026)",
@@ -73,7 +82,13 @@ export default function Grade7Results2026Guide() {
       <div className="mt-8 rounded-2xl border border-brass/40 bg-brass/10 p-6 leading-relaxed text-ink/85">
         <p className="font-semibold text-ink">In short</p>
         <ul className="mt-3 list-disc space-y-2 pl-5">
-          <li>The 2026 Grade 7 results are due on Friday 27 November 2026.</li>
+          <li>
+            The 2026 Grade 7 results came out on Friday 27 November 2026. The national pass rate is 50.94%. Check them on the{" "}
+            <a href="https://results.zimsec.co.zw/" target="_blank" rel="noopener noreferrer" className="text-leaf underline decoration-leaf/30 underline-offset-4">
+              ZIMSEC results portal
+            </a>{" "}
+            by about Wednesday 2 December.
+          </li>
           <li>Form 1 places for 2027 are based on Grade 7 results. Entrance tests are not allowed.</li>
           <li>Boarding applications are on eMAP, reported to close on 31 December 2026. Apply for day places with each school.</li>
           <li>Schools open for 2027 on Tuesday 12 January.</li>
@@ -83,10 +98,10 @@ export default function Grade7Results2026Guide() {
       <div className="text-[1.05rem] leading-relaxed text-ink/85">
         <H2>When the results come out</H2>
         <p className="mt-4">
-          The Minister of Primary and Secondary Education, Torerayi Moyo, announced on 25 November 2026 that ZIMSEC will release
-          the 2026 Grade 7 results on Friday 27 November. He said the early release gives parents time to look for 2027 Form 1
-          places. These are the first Grade 7 exams under the Heritage-Based Curriculum. Last year&apos;s national pass rate was
-          48.49%.
+          ZIMSEC released the 2026 Grade 7 results on Friday 27 November 2026. The national pass rate is 50.94%, up from 48.49%
+          in 2025. 395,530 learners sat the exams. Girls passed at 56.39% and boys at 45.18%. These are the first Grade 7 exams
+          under the Heritage-Based Curriculum. The Minister, Torerayi Moyo, said the early release gives parents time to look for
+          2027 Form 1 places.
         </p>
 
         <H2>Your next steps</H2>
@@ -105,6 +120,12 @@ export default function Grade7Results2026Guide() {
         <ul className="mt-4 list-disc space-y-2 pl-5">
           <li>About 36,000 Form 1 boarding places are available at 320 registered schools, for more than 400,000 Grade 7 learners.</li>
           <li>Boarding places are limited, so it is wise to plan for a day school too.</li>
+          <li>
+            <Link href="/guides/emap-form-1-2027" className="text-leaf underline decoration-leaf/30 underline-offset-4">
+              Read our step-by-step eMAP guide
+            </Link>
+            .
+          </li>
           <li>
             Starting boarding in January?{" "}
             <Link href="/guides/boarding-packing-list" className="text-leaf underline decoration-leaf/30 underline-offset-4">

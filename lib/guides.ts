@@ -12,9 +12,16 @@ export const GUIDES: GuideSummary[] = [
     slug: "grade-7-results-2026",
     title: "Grade 7 results 2026: what to do next for Form 1",
     summary:
-      "The 2026 Grade 7 results are due on Friday 27 November. How to get them, how Form 1 places are decided, eMAP boarding applications before 31 December, and what to ask secondary schools.",
-    updated: "2026-11-26",
+      "The 2026 Grade 7 results are out (50.94% pass rate). How to get them before the portal closes, how Form 1 places are decided, eMAP boarding applications before 31 December, and what to ask secondary schools.",
+    updated: "2026-11-28",
     topics: ["school-term"],
+  },
+  {
+    slug: "emap-form-1-2027",
+    title: "How to apply for Form 1 boarding places on eMAP (2027)",
+    summary:
+      "Grade 7 results are out. Key dates, how the school choices work, what you need before you start, and what to do if your child isn't placed for Form 1 boarding in 2027.",
+    updated: "2026-11-28",
   },
   {
     slug: "boarding-packing-list",
