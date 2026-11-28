@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { formatGuideDate } from "@/lib/guides";
 
-const UPDATED = "2026-11-27";
+const UPDATED = "2026-11-28";
 
 export const metadata: Metadata = {
   title: "How to apply for Form 1 boarding places on eMAP (2027) | SchoolSpot Zimbabwe",
@@ -20,6 +20,15 @@ const SOURCES = [
     label: "Pindula News: 2027 Form One boarding applications now open online, 27 October 2026",
   },
   { href: "http://www.emap.co.zw/Form1Enrol/", label: "eMAP Form 1 enrolment page (Ministry of Primary and Secondary Education)" },
+  {
+    href: "https://www.newzimbabwe.com/zimsec-grade-7-results-out-records-50-94-pass-rate/",
+    label: "NewZimbabwe: ZIMSEC Grade 7 results out, records 50.94% pass rate, 27 November 2026",
+  },
+  {
+    href: "https://www.zimbabwesituation.com/news/grade-7-pass-rate-rises-to-5094-percent/",
+    label: "The Herald (via Zimbabwe Situation): Grade 7 pass rate rises to 50,94 percent, 28 November 2026",
+  },
+  { href: "https://results.zimsec.co.zw/", label: "ZIMSEC results portal" },
   {
     href: "https://www.newzimbabwe.com/zimsec-to-release-2026-grade-7-results-on-friday/",
     label: "NewZimbabwe: ZIMSEC to release 2026 Grade 7 results on Friday, 25 November 2026",
@@ -83,7 +92,20 @@ export default function EmapForm1Guide() {
       </h1>
       <p className="mt-4 text-sm text-granite">Last checked {formatGuideDate(UPDATED)}</p>
 
-      <div className="mt-8 rounded-2xl border border-brass/40 bg-brass/10 p-6 leading-relaxed text-ink/85">
+      <div className="mt-8 rounded-2xl border border-leaf/30 bg-leaf/5 p-6 leading-relaxed text-ink/85">
+        <p className="font-semibold text-ink">Grade 7 results are out</p>
+        <p className="mt-2">
+          ZIMSEC released the 2026 Grade 7 results on Friday 27 November 2026. The national pass rate is 50.94%. Check your
+          child&apos;s results on the{" "}
+          <a href="https://results.zimsec.co.zw/" target="_blank" rel="noopener noreferrer" className={linkClass}>
+            ZIMSEC results portal
+          </a>{" "}
+          (choose your province). Reports say the portal is open for five days only, so until about Wednesday 2 December. After
+          that, collect the result slip from your child&apos;s exam centre.
+        </p>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-brass/40 bg-brass/10 p-6 leading-relaxed text-ink/85">
         <p className="font-semibold text-ink">In short</p>
         <ul className="mt-3 list-disc space-y-2 pl-5">
           <li>
@@ -111,8 +133,9 @@ export default function EmapForm1Guide() {
           learners applied in the first week alone.
         </p>
         <p className="mt-4">
-          The 2026 Grade 7 results were due out on Friday 27 November 2026. Schools look at results when they make offers, so
-          this is when activity on eMAP picks up.
+          The 2026 Grade 7 results came out on Friday 27 November 2026, with a national pass rate of 50.94% (up from 48.49% in
+          2025). Schools look at results when they make offers, so expect activity on eMAP to pick up now. Save a copy of your
+          child&apos;s results while the portal is open.
         </p>
 
         <H2>What you need before you start</H2>
@@ -184,7 +207,9 @@ export default function EmapForm1Guide() {
           <li>Look beyond the best-known schools. They get far more applications than they have places.</li>
           <li>
             Consider day school. eMAP is for boarding only, and not every learner needs boarding. If day school works for your
-            family, contact local schools directly about Form 1 places.
+            family, contact local schools directly about Form 1 places. Day places are applied for in person at the school, and
+            some schools say they are already full, so don&apos;t wait. The Ministry says every learner who sat Grade 7 will get a
+            Form 1 place for 2027.
           </li>
           <li>Private and mission schools may run their own admissions alongside eMAP. Check with each school.</li>
         </ul>

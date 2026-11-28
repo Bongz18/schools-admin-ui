@@ -12,8 +12,8 @@ export const GUIDES: GuideSummary[] = [
     slug: "emap-form-1-2027",
     title: "How to apply for Form 1 boarding places on eMAP (2027)",
     summary:
-      "Key dates, how the school choices work, what you need before you start, and what to do if your child isn't placed for Form 1 boarding in 2027.",
-    updated: "2026-11-27",
+      "Grade 7 results are out. Key dates, how the school choices work, what you need before you start, and what to do if your child isn't placed for Form 1 boarding in 2027.",
+    updated: "2026-11-28",
   },
   {
     slug: "boarding-packing-list",
